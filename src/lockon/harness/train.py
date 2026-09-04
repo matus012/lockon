@@ -182,6 +182,7 @@ class RetentionEvalCallback(BaseCallback):
             self._best_retention = policy_retention
             best_path = self._out_dir / "best.zip"
             self.model.save(str(best_path))
+            Path(str(best_path) + ".obs.json").write_text('{"obs_seen": "lock"}', encoding="utf-8")
             logger.info("best.zip updated: retention=%.4f (step %d)", policy_retention, steps)
         return True
 

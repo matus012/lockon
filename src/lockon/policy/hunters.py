@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import math
+from pathlib import Path
 
 import numpy as np
 
@@ -125,12 +127,18 @@ class PPOHunter:
         self.name = "ppo_hunter"
         self.path = path
         self._model: object | None = None
+        # observation convention the checkpoint was trained with: "lock" (D15, default) or "state"
+        # (runs before deviation row 12). Read from the sidecar <zip>.obs.json when present.
+        self.obs_seen: str = "lock"
 
     def reset(self, layout: ArenaLayout, seed: int) -> None:
         from stable_baselines3 import PPO
 
         self._model = PPO.load(self.path, device="cpu")
-        logger.info("PPOHunter loaded %s on device=cpu", self.path)
+        sidecar = Path(str(self.path) + ".obs.json")
+        if sidecar.exists():
+            self.obs_seen = str(json.loads(sidecar.read_text(encoding="utf-8")).get("obs_seen", "lock"))
+        logger.info("PPOHunter loaded %s on device=cpu (obs_seen=%s)", self.path, self.obs_seen)
 
     def act(self, obs: AgentObs) -> AgentAction:
         raise NotImplementedError(

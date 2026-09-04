@@ -1,5 +1,5 @@
-STATUS: 5/12 — G5 PASS — PPO 54.5% > static 44.2% (held-out seeds 1000-1019, n=20); PPO vs scripted 54.5 vs 54.7 = tie -> hero stays scripted; G6 sweep running
-RETENTION: static 44.2% · scripted 54.7% · ppo 54.5% (20 episodes, mid difficulty, noise dial 0.3, held-out seeds)
-HPC: 0/0 · 0/70-100 GPU-h (bundle + 45-unit CPU array emitted, not submitted)
-NEEDS YOU: none (step 6 approval request follows after G6/G7)
-ppo_vs_scripted: 1 of 3
+STATUS: 5/12 — G5 PASS (run 4 ckpt, held-out seeds, per-episode noise: PPO 53.2% > static 46.0%); PPO does not beat scripted (56.2%) -> hero = scripted; G6 sweep running
+RETENTION: static 46.0% · scripted 56.2% · ppo 53.2% (20 episodes, mid difficulty, noise dial 0.3, held-out seeds 1000-1019)
+HPC: 0/0 · 0/70-100 GPU-h (45-unit CPU array + 22 GPU-h plan emitted, not submitted)
+NEEDS YOU: none yet — "approve HPC launch" request follows after G6/G7 (reports/hpc_launch_plan.md)
+ppo_vs_scripted: 2 of 3

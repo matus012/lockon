@@ -132,6 +132,7 @@ def run_episode(
     state = env.state()
     obs = obs_builder.reset(state)
     n_stack = hunter.n_stack if isinstance(hunter, PPOHunter) else 1
+    obs_mode = hunter.obs_seen if isinstance(hunter, PPOHunter) else "lock"
     stack: deque[npt.NDArray[np.float32]] = deque(maxlen=n_stack)
     # SB3 VecFrameStack semantics: zero-filled history, newest observation last (review F7)
     for _ in range(n_stack - 1):
@@ -163,7 +164,8 @@ def run_episode(
         detections = injector(gt, t)
         tracks, lock_status = tracker.update(detections, t)
         # the policy's "time since seen" is its own tracker's lock, not privileged geometry (D15)
-        obs = obs_builder.step(state, seen=lock_status.locked)
+        seen = lock_status.locked if obs_mode == "lock" else state.person_visible
+        obs = obs_builder.step(state, seen=seen)
         stack.append(obs.vector())
 
         if sensor is not None and frames is not None:
