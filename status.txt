@@ -1,5 +1,5 @@
-STATUS: 4/12 — IN PROGRESS — core/env/sensor/track/policy built (G0 G1 G8 PASS @2171ecf); harness episode/eval/scenes building
-RETENTION: static n/a · scripted n/a · ppo n/a (0 episodes)
+STATUS: 4/12 — IN PROGRESS — G0 G1 G8 PASS; G4 (scripted vs static, n=20) running; render + train/sweep CLIs building
+RETENTION: static 0.45 · scripted 0.63 · ppo n/a (5 episodes, preview only)
 HPC: 0/0 · 0/70-100 GPU-h
 NEEDS YOU: none
 ppo_vs_scripted: 0 of 3

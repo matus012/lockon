@@ -6,11 +6,21 @@ graph, §3 gates) → 4. `project.md` only when a decision is questioned (it is 
 Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doctrines.md`.
 
 ## Position
-- **Step 2 of 12 — in progress** (2026-09-04). Step 1 DONE (commit 8cbe538: render probe OK
-  via GLFW, G0 PASS, torch 2.14+cu126 cuda=True, mujoco 3.12, sb3 2.9, trackers 2.6).
-  Specs written for env/sensor/track/policy/harness (`src/lockon/<pkg>/SPEC.md`); impl
-  subagents building env, track, sensor concurrently. Next gates: G1 (env bench), G2, G3.
-- Session clock: started 2026-09-04. Ritual (plan §8) every ~2 h: commit → update this file +
+- **Step 4 of 12 — G4 running** (2026-09-04). Commits: 8cbe538 step 1 · 2171ecf packages ·
+  f455aa9 review pass 1 · harness phase A (episode/scenes/gym/eval). Gates PASS: G0 G1 G8.
+  G4 preview n=5: scripted 0.628 vs static 0.447. Full G4 (n=20) running →
+  `runs/g4_eval.log`, `reports/eval_scripted_vs_static.json`.
+- In flight: phase B1 render.py (GIFs G2/G3, chase clip, mp4 shots) · phase B2 train.py +
+  sweep.py (G5/G6). After B2 lands: launch the ≤5 h PPO run (`runs/ppo_local`), then G6 sweep
+  on scripted/static while it trains (plan §5 step 8 non-PPO work).
+- Fresh-context lead review (opus) of env/sensor/track/policy done; all findings fixed or
+  logged (deviation-log rows 2–6). Known honest property: ByteTrack coast across a 2 s gap
+  under jitter 4.4 px keeps the id in 16/20 seeds (flat in box speed and state model) — the
+  hunter's job is to shorten gaps; this goes in the README "where it breaks".
+- G4 verdict annotation owed (review finding 6): the prey's LOS-break fires on
+  `person_visible`, so it is a harder examiner against a mover than against the static camera —
+  bias is conservative (works against scripted/PPO), a pass is safe.
+- Session clock: ~2.5 h in. Ritual (plan §8) every ~2 h: commit → update this file +
   status.txt → compaction.
 
 ## Architecture (plan §9 D1, D4)
@@ -65,4 +75,4 @@ type status.txt ; git log --oneline -5 ; uv run python scripts/check_gates.py --
 Then open plan.md §5 at the step named in status.txt and continue from the first unmet gate.
 
 ## Open items / blockers
-None. `reports/blockers.md` is empty.
+None. `reports/blockers.md` is empty. Deviation log has 6 rows (all gate-semantics **no**).
