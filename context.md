@@ -6,22 +6,23 @@ graph, §3 gates) → 4. `project.md` only when a decision is questioned (it is 
 Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doctrines.md`.
 
 ## Position
-- **Step 4 of 12 — G4 running** (2026-09-04). Commits: 8cbe538 step 1 · 2171ecf packages ·
-  f455aa9 review pass 1 · harness phase A (episode/scenes/gym/eval). Gates PASS: G0 G1 G8.
-  G4 preview n=5: scripted 0.628 vs static 0.447. Full G4 (n=20) running →
-  `runs/g4_eval.log`, `reports/eval_scripted_vs_static.json`.
-- In flight: phase B1 render.py (GIFs G2/G3, chase clip, mp4 shots) · phase B2 train.py +
-  sweep.py (G5/G6). After B2 lands: launch the ≤5 h PPO run (`runs/ppo_local`), then G6 sweep
-  on scripted/static while it trains (plan §5 step 8 non-PPO work).
-- Fresh-context lead review (opus) of env/sensor/track/policy done; all findings fixed or
-  logged (deviation-log rows 2–6). Known honest property: ByteTrack coast across a 2 s gap
-  under jitter 4.4 px keeps the id in 16/20 seeds (flat in box speed and state model) — the
-  hunter's job is to shorten gaps; this goes in the README "where it breaks".
-- G4 verdict annotation owed (review finding 6): the prey's LOS-break fires on
-  `person_visible`, so it is a harder examiner against a mover than against the static camera —
-  bias is conservative (works against scripted/PPO), a pass is safe.
-- Session clock: ~2.5 h in. Ritual (plan §8) every ~2 h: commit → update this file +
-  status.txt → compaction.
+- **Step 5 of 12 — PPO run 3 in flight** (2026-09-04, ~4.5 h in). Gates PASS: G0 G1 G2 G3 G4
+  G8. Committed through "visual + RL instrument fixes" (see git log). D1 status passed:
+  scripted 55.4 % vs static 37.5 % retention (n=20, same seeds, mid difficulty).
+- PPO history (all instrument, none design rejections; counter stays 0 of 3):
+  run 1 (runs/ppo_local_v0): trained on 8 fixed layouts, deterministic prey → below static.
+  run 2 (runs/ppo_local_v1): fresh layouts, still below static; measured reward ↑ visibility ↑
+  retention ↓ (box jumps 8.5 px/step, 5.6 ids/episode) → reward now = tracker lock (D13).
+  run 3 (runs/ppo_local): lock reward; eval every 200k vs static; best.zip by retention.
+  G5 = `check_gates.py G5` once run 3 ends (~35 min at 2.9k steps/s for 6M steps).
+- In flight: demo package (render_all + viewer, impl agent). Queued after training frees the
+  CPU: G6 sweep (`python -m lockon.harness.sweep --config configs/sweep_local.yaml`),
+  per-package READMEs, root README, G7, C6 rotation pass, then step 6 STOP for HPC approval.
+- Known honest properties for the README: ByteTrack coast keeps the id in 16/20 seeds across a
+  2 s gap at noise 0.3; darkness alone never breaks lock (thermal proxy is dark-immune); the
+  prey's LOS-break fires on visibility so it examines a mover harder than a static camera
+  (conservative bias for G4/G5).
+- Session ritual (plan §8): every ~2 h commit → update this file + status.txt → compaction.
 
 ## Architecture (plan §9 D1, D4)
 ```
