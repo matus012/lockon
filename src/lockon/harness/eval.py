@@ -94,13 +94,14 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="lockon.harness eval: does P beat Q on retention?")
     parser.add_argument("--policy", required=True, help="P: static | scripted | path to a PPO zip")
     parser.add_argument("--vs", required=True, dest="vs_policy", help="Q: static | scripted | path")
-    parser.add_argument("--n", type=int, default=20, help="episodes (seeds 0..n-1)")
+    parser.add_argument("--n", type=int, default=20, help="episodes (seeds base..base+n-1)")
+    parser.add_argument("--seed-base", type=int, default=0, help="first seed; gates use 1000 (held out from training-time model selection, which used 0..19)")
     parser.add_argument("--difficulty", nargs="+", default=["mid"])
     parser.add_argument("--json", type=str, default=None, help="write full results here")
     args = parser.parse_args(argv)
 
     difficulty = _parse_difficulty(args.difficulty)
-    seeds = list(range(args.n))
+    seeds = list(range(args.seed_base, args.seed_base + args.n))
 
     # Union of {P, Q, static, scripted} so the table always carries both baselines (SPEC.md: "3-row
     # table (static / scripted / policy where applicable)") alongside whatever P/Q were requested.

@@ -1,5 +1,5 @@
-STATUS: 5/12 — IN PROGRESS — G0-G4 G8 PASS; PPO run 4 training (lock reward, filtered drone): 45.9/44.3/45.5% vs static 37.5% at 0.2/0.4/0.6M steps
-RETENTION: static 37.5% · scripted 56.6% · ppo 45.5% (20 episodes, mid difficulty, noise dial 0.3; ppo = interim eval)
+STATUS: 5/12 — G5 PASS — PPO 54.5% > static 44.2% (held-out seeds 1000-1019, n=20); PPO vs scripted 54.5 vs 54.7 = tie -> hero stays scripted; G6 sweep running
+RETENTION: static 44.2% · scripted 54.7% · ppo 54.5% (20 episodes, mid difficulty, noise dial 0.3, held-out seeds)
 HPC: 0/0 · 0/70-100 GPU-h (bundle + 45-unit CPU array emitted, not submitted)
-NEEDS YOU: none
-ppo_vs_scripted: 0 of 3
+NEEDS YOU: none (step 6 approval request follows after G6/G7)
+ppo_vs_scripted: 1 of 3
