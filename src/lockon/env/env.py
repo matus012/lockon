@@ -297,6 +297,11 @@ class Env:
         )
 
     # -- public helpers ----------------------------------------------------------------------
+    @property
+    def darkness(self) -> float:
+        """Current darkness dial (scripted lights-cut may move it mid-episode)."""
+        return self._darkness
+
     def set_darkness(self, darkness: float) -> None:
         self._darkness = float(np.clip(darkness, 0.0, 1.0))
         for i in range(self.layout.lights.shape[0]):
