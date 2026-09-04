@@ -26,7 +26,7 @@ from typing import cast
 
 from lockon.harness.episode import EpisodeResult, resolve_hunter, run_episode
 from lockon.harness.render import _write_mp4, render_frames
-from lockon.harness.scenes import SCENES, SceneSpec
+from lockon.harness.scenes import SCENE_WINDOWS, SCENES, SceneSpec
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +46,8 @@ class ShotSpec:
 SHOTS: dict[str, ShotSpec] = {
     "occlusion": ShotSpec(
         scene="occlusion",
-        start=118,
-        steps=60,
+        start=None,  # resolved from SCENE_WINDOWS at render time (follows the selected seed's gap)
+        steps=None,
         hero=False,  # showcase seed is certified under the scene's ScriptedHunter only (row 7, review F3)
         caption="Person ducks behind a pillar, drone repositions, lock survives.",
     ),
@@ -124,6 +124,8 @@ def _render_one(
 ) -> dict[str, object]:
     start = None if steps_override is not None else shot.start
     steps = steps_override if steps_override is not None else shot.steps
+    if steps_override is None and shot.start is None and shot.scene in SCENE_WINDOWS and shot.scene != "chase":
+        start, steps = SCENE_WINDOWS[shot.scene]()
     policy = _resolve_policy(shot, policy_flag)
 
     spec = SCENES[shot.scene]
@@ -197,7 +199,7 @@ def _shots_ok(out: Path) -> bool:
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Render the three lockon demo shots + manifest.json.")
-    p.add_argument("--policy", choices=["best", "scripted"], default="best")
+    p.add_argument("--policy", choices=["best", "scripted"], default="scripted", help="hero policy; scripted per plan §6 default (deviation row 10)")
     p.add_argument("--out", type=Path, default=Path("demo/shots"))
     p.add_argument("--steps", type=int, default=None, help="override: shrink every shot to N steps")
     p.add_argument("--fps", type=int, default=10)

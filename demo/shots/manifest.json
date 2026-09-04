@@ -1,0 +1,41 @@
+{
+  "occlusion": {
+    "scene": "occlusion",
+    "seed": 30,
+    "policy": "scripted_hunter",
+    "window": {
+      "start": 52,
+      "steps": 60
+    },
+    "retention": 0.8833333333333333,
+    "caption": "Person ducks behind a pillar, drone repositions, lock survives.",
+    "file": "occlusion.mp4",
+    "git_head": "aa971c236ea81020cefddd26cf32414c625c51b7"
+  },
+  "lights_cut": {
+    "scene": "lights_cut",
+    "seed": 12,
+    "policy": "static_camera",
+    "window": {
+      "start": 46,
+      "steps": 54
+    },
+    "retention": 0.9814814814814815,
+    "caption": "Lights cut: color view goes black, heat view takes over, lock survives.",
+    "file": "lights_cut.mp4",
+    "git_head": "aa971c236ea81020cefddd26cf32414c625c51b7"
+  },
+  "chase": {
+    "scene": "chase",
+    "seed": 14,
+    "policy": "scripted_hunter",
+    "window": {
+      "start": 0,
+      "steps": 200
+    },
+    "retention": 0.86,
+    "caption": "The chase: hero hunter vs prey at mid difficulty, full run.",
+    "file": "chase.mp4",
+    "git_head": "aa971c236ea81020cefddd26cf32414c625c51b7"
+  }
+}

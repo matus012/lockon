@@ -1,8 +1,10 @@
 # lockon.sensor
 
 Owns rendering: turns a `WorldState` + a duck-typed `(model, data, camera)` handle into a
-multi-channel `SensorFrame` (rgb, depth, "thermal proxy" — an emissive second render pass, never
-called "thermal" alone in public wording) and composes a side-by-side strip for GIFs. Each channel
+multi-channel `SensorFrame` (rgb, depth, "thermal proxy" — an emissive second render pass that
+kills every light + the headlight and whitens the person geoms before rendering, then restores
+model state byte-exact; never called "thermal" alone in public wording) and composes a
+side-by-side strip for GIFs. Each channel
 renderer is registered by name in `RENDERERS`; adding a channel means one `core.CHANNEL_SPECS`
 entry plus one renderer here, nothing else. Framing: this is the sensing side of the drone-safety
 / search-and-rescue perception stack, degraded by darkness and channel loss (project.md §1).
@@ -16,7 +18,9 @@ Import rule (`tests/test_boundaries.py`): `sensor` may import `lockon.core` + th
 - `.capture(state: WorldState, darkness: float) -> SensorFrame`; `.close() -> None`.
 - `side_by_side(frame: SensorFrame, labels: bool = True) -> npt.NDArray[np.uint8]` — (H, 3W, 3).
 - `RENDERERS: dict[str, ChannelRenderer]`; `register(name) -> Callable[[ChannelRenderer], ChannelRenderer]`.
-- `RenderContext(model, data, renderer, camera, state, darkness, rng, scene_option)`.
+- `RenderContext(model, data, renderer, camera, state, darkness, rng, scene_option)` —
+  `scene_option.geomgroup` renders every geom group except group 2 (the drone body, set 0), so the
+  camera never sees its own airframe; the person figure (group 3) is visible by default.
 - Renderers registered under `"rgb"`, `"depth"`, `"thermal"` in `channels.py`.
 
 ## Deviations from SPEC

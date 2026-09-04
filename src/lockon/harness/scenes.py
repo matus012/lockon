@@ -173,16 +173,21 @@ def _build_chase() -> SceneSpec:
     )
 
 
-OCCLUSION_CANDIDATE_SEEDS = range(11, 61)
+OCCLUSION_CANDIDATE_SEEDS = range(11, 111)
 OCCLUSION_MIN_GAP = 5
+OCCLUSION_MAX_GAP = 20  # < the tracker's 30-step coast buffer: a showcase, not a lottery (row 14)
+OCCLUSION_MAX_REACQUIRE = 5  # steps from gap end to the id being held again
+OCCLUSION_POST_STEPS = 20
 OCCLUSION_POST_RETENTION = 0.8
 
 
 def occlusion_showcase_ok(states: list[WorldState], retained: npt.NDArray[np.bool_]) -> bool:
-    """A showcase seed must contain a real occlusion gap AND a reacquisition with the same id.
+    """A showcase seed must contain a real occlusion gap AND a prompt reacquisition with the same id.
 
-    Gap = >= OCCLUSION_MIN_GAP consecutive steps with person_visible False; after the gap ends the
-    retained fraction over the remaining steps must be >= OCCLUSION_POST_RETENTION.
+    Gap = OCCLUSION_MIN_GAP..OCCLUSION_MAX_GAP consecutive steps with person_visible False; the id
+    must be retained again within OCCLUSION_MAX_REACQUIRE steps of the gap ending, and the
+    OCCLUSION_POST_STEPS steps after that must be >= OCCLUSION_POST_RETENTION retained
+    (deviation-log rows 7 and 14).
     """
     vis = np.array([st.person_visible for st in states], dtype=bool)
     start = None
@@ -190,10 +195,16 @@ def occlusion_showcase_ok(states: list[WorldState], retained: npt.NDArray[np.boo
         if not v and start is None:
             start = t
         if v and start is not None:
-            if t - start >= OCCLUSION_MIN_GAP:
-                tail = retained[t:]
-                return bool(len(tail) >= 10 and tail.mean() >= OCCLUSION_POST_RETENTION)
+            gap = t - start
             start = None
+            if not (OCCLUSION_MIN_GAP <= gap <= OCCLUSION_MAX_GAP):
+                continue
+            reacq = next((k for k in range(t, min(len(retained), t + OCCLUSION_MAX_REACQUIRE + 1)) if retained[k]), None)
+            if reacq is None:
+                continue
+            tail = retained[reacq : reacq + OCCLUSION_POST_STEPS]
+            if len(tail) >= OCCLUSION_POST_STEPS and tail.mean() >= OCCLUSION_POST_RETENTION:
+                return True
     return False
 
 
@@ -242,3 +253,40 @@ class _SceneRegistry(dict[str, SceneSpec]):
 
 
 SCENES: dict[str, SceneSpec] = _SceneRegistry()
+
+
+OCCLUSION_WINDOW_PRE = 15  # steps shown before the gap opens
+OCCLUSION_WINDOW_LEN = 60
+
+
+def occlusion_window() -> tuple[int, int]:
+    """(start, steps) around the FIRST gap >= OCCLUSION_MIN_GAP of the selected showcase seed.
+
+    The window used to be pinned to 118..178 (chosen for seed 34); when per-episode noise moved
+    the selected seed to 29 the pinned clip ended inside the loss instead of the recovery
+    (visual check 2026-09-05). Derived here, once, from the same episode the rule certified.
+    """
+    from lockon.harness.episode import run_episode
+
+    spec = SCENES["occlusion"]
+    res = run_episode(spec.difficulty, spec.seed, spec.hunter, spec.prey, steps=spec.steps, scene=spec.scene)
+    vis = [st.person_visible for st in res.states]
+    start_gap = None
+    for t, v in enumerate(vis):
+        if not v and start_gap is None:
+            start_gap = t
+        elif v and start_gap is not None:
+            gap = t - start_gap
+            if OCCLUSION_MIN_GAP <= gap <= OCCLUSION_MAX_GAP:
+                s0 = max(0, start_gap - OCCLUSION_WINDOW_PRE)
+                return s0, min(OCCLUSION_WINDOW_LEN, spec.steps - s0)
+            start_gap = None
+    raise RuntimeError("occlusion showcase seed has no qualifying gap — selection rule violated")
+
+
+SCENE_WINDOWS: dict[str, Callable[[], tuple[int, int]]] = {
+    "occlusion": occlusion_window,
+    "lights_cut": lambda: (46, 54),
+    "sensor3": lambda: (0, 30),
+    "chase": lambda: (0, EPISODE_STEPS),
+}

@@ -25,7 +25,7 @@ from PIL import Image, ImageDraw, ImageFont
 from lockon.core.schemas import CHANNELS, ArenaLayout, LockStatus, SensorFrame, Track, WorldState
 from lockon.env.env import Env
 from lockon.harness.episode import EpisodeResult, resolve_hunter, run_episode
-from lockon.harness.scenes import SCENES, SceneSpec
+from lockon.harness.scenes import SCENE_WINDOWS, SCENES, SceneSpec
 from lockon.sensor.sensor import side_by_side
 
 logger = logging.getLogger(__name__)
@@ -234,7 +234,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--policy", default=None, help="static|scripted|<path to a PPOHunter zip>")
     p.add_argument("--fps", type=int, default=10)
     p.add_argument("--steps", type=int, default=None)
-    p.add_argument("--start", type=int, default=None)
+    p.add_argument("--start", type=str, default=None, help="window start step, or 'auto' = the scene's own window (SCENE_WINDOWS)")
     p.add_argument("--scale", type=float, default=1.0)
     return p.parse_args(argv)
 
@@ -242,8 +242,14 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> None:
     logging.basicConfig(level=logging.INFO)
     args = _parse_args(argv)
+    start: int | None
+    steps: int | None = args.steps
+    if args.start == "auto":
+        start, steps = SCENE_WINDOWS[args.scene]()
+    else:
+        start = int(args.start) if args.start is not None else None
     frames = render_frames(
-        args.scene, policy=args.policy, fps=args.fps, steps=args.steps, start=args.start, scale=args.scale
+        args.scene, policy=args.policy, fps=args.fps, steps=steps, start=start, scale=args.scale
     )
     _write_gif(frames, args.gif, args.fps)
     if args.mp4 is not None:

@@ -20,17 +20,31 @@ state and running **lock retention %**, top-down minimap (green line = line of s
 IoU ≥ 0.5 to the true box ÷ episode steps` (`lockon.core.metrics`). An id switch is a loss even
 if some other track still overlaps — that is the whole point. Secondary: time-to-reacquire.
 
-Mid difficulty (every dial at 0.5), 20 episodes, identical seeds, tracker noise dial 0.3:
+Every number below is regenerated from `reports/eval_*.json` by `scripts/readme_table.py`:
 
-| camera policy | lock retention % | ± std | time-to-reacquire (steps) |
-|---|---|---|---|
-| static camera (floor) | 37.5 | 25.4 | 1.8 |
-| scripted hunter (visibility-greedy) | 56.6 | 35.3 | 2.2 |
-| PPO hunter | pending (step 5) | | |
+| camera policy | lock retention % | ± std | 95 % CI of mean | Δ vs static (95 % CI) |
+|---|---|---|---|---|
+| static camera (floor) | 45.9 | 33.8 | [31.1, 60.8] | — |
+| scripted hunter (visibility-greedy) | 56.2 | 34.4 | [41.1, 71.3] | +10.2 [−2.5, +23.0] |
+| PPO hunter (best local checkpoint) | 53.2 | 36.7 | [37.1, 69.3] | +7.2 [−6.2, +20.7] |
 
-Degradation curves (retention vs occluder density · darkness · prey speed · prey aggressiveness ·
-channel dropout, mean ± std over ≥ 20 episodes per point, one axis at a time with the others at
-0.5) land in `reports/curves/` from a single command (`python -m lockon.harness.sweep`).
+n = 20 episodes per arm, seeds 1000–1019 (held out from model selection), mid difficulty (every
+dial 0.5), tracker noise dial 0.3, per-episode noise seed. **These local gates are direction-only:**
+at n = 20 the paired CI is ±0.13–0.17, so "scripted ≈ PPO > static" is the honest reading, and
+resolving a 5-point gap needs ≈ 440 episodes per arm (paired, 80 % power). That is what the
+HPC seed × reward × arena array is for. The hero policy is therefore the **scripted hunter**;
+PPO is reported as it is.
+
+Degradation curves — retention vs occluder density · darkness · prey speed · prey aggressiveness
+· channel dropout, mean ± std over 20 episodes per point, one axis at a time with the others at
+0.5 — from one command (`python -m lockon.harness.sweep --config configs/sweep_local.yaml`):
+
+![curves](reports/curves/summary.png)
+
+`reports/sweep/failure_report.md` names the worst point and the dominant loss cause per axis. Across
+all 1,500 sweep episodes every lock loss is attributed to occlusion or field-of-view, never to
+darkness or channel dropout: with a dark-immune thermal proxy and at most one dead channel at a
+time, those two axes cannot break lock on their own (a design statement, now also a measurement).
 
 ## How it works (7 packages, each standalone)
 
@@ -40,7 +54,7 @@ env      MuJoCo arena: pillars, point lights, a kinematic drone camera (velocity
          fixed altitude, first-order response), a capsule humanoid; line of sight via mj_ray;
          the true 2D box is projected from state — no render in the loop
 sensor   colour / depth / thermal-proxy render passes, channel registry, dead-channel flags
-track    noisy-GT boxes (miss, jitter, range dropout, latency) → ByteTrack → lock status
+track    noisy-GT boxes (miss, jitter, range dropout, 1-step latency) → ByteTrack → lock status
 policy   scripted prey (cover-seek, dark-seek, LOS-break, speed dials) · scripted hunter ·
          PPO hunter (Stable-Baselines3, state observations only, CPU)
 harness  episode runner, Gymnasium wrapper, train / eval / sweep / render CLIs
@@ -49,38 +63,48 @@ demo     three shots + Gradio viewer (static HTML fallback)
 
 Design law: **nothing outside our control in the critical path.** The tracker consumes the
 simulator's own true boxes plus injected noise, so it can never fail for a reason we cannot fix.
-RL trains on state (own pose, last-seen target pose, time since seen, 16 raycasts, light level,
-channel-alive flags; 4-frame stack), never on pixels; rendering exists for clips only.
+RL trains on state (own pose, last-seen target pose, time since seen, 16 raycasts, light level
+at the last sighting, channel-alive flags; 4-frame stack), never on pixels; rendering exists for
+clips only. The reward is the frozen tracker's lock, run inside the training loop at state speed.
 "Thermal" is a **thermal proxy**: a second render pass with an emissive target material,
 unaffected by light level.
 
-## Where it breaks (honest list)
+## Where it breaks (honest list — every line traces to `reports/deviation-log.md` or a JSON)
 
 - **Coasting through occlusion is a lottery.** ByteTrack's image-space Kalman keeps the id across
   a 2 s gap in 16 of 20 noise seeds at noise dial 0.3, flat in box speed and state model
-  (`reports/deviation-log.md` row 6). The hunter's job is to keep gaps short.
+  (row 6). The hunter's job is to keep gaps short.
+- **Moving cameras pay a latency tax.** The noise model delivers boxes one step late at dial
+  0.3; retention scores against the current box, so the faster the box moves in the image, the
+  lower the IoU. The static floor is exempt by construction.
 - **Darkness alone never breaks lock**: the thermal proxy is dark-immune, so the darkness curve
-  is flat unless the thermal channel also drops. That is the design, stated, not a result.
+  is flat-to-rising. It rises because the scripted prey blends dark-seeking with cover-seeking
+  above darkness 0.3 and hides behind pillars less — a property of the examiner, stated here.
+- **The prey examines movers harder than the floor.** Disabling its line-of-sight break widens the
+  scripted-vs-static gap from +10.2 to +16.8 points (`reports/los_break_bias.json`): the shipped
+  comparison is conservative for the hunters by ≈ 6.5 points.
 - **Reward ≠ visibility.** A policy rewarded for raw visibility learned to strafe and yaw so hard
   that boxes jumped ~8 px/step and the tracker switched ids 5.6× per episode — visibility up,
-  retention down. Training now rewards *tracker lock* (row 8). Exploration noise above
-  std ≈ 0.2 pushes the target out of the field of view (row 9).
-- The prey's line-of-sight break fires on visibility, so it examines a moving camera harder than
-  a static one: the comparisons above are conservative for the hunters.
+  retention down (row 8). Exploration noise above std ≈ 0.2 pushes the target out of the field
+  of view (row 9). Letting the policy observe the tracker's lock instead of geometry (row 12)
+  made it worse on held-out seeds (row 13). Three local PPO designs; one passes the floor, none
+  beats the scripted hunter.
+- **n = 20 cannot resolve the gaps it reports** (table above).
 
 ## Run it
 
 ```bash
 uv sync                                                # Python 3.11, per-project venv
 uv run python scripts/check_gates.py --all             # every gate, verdicts -> reports/gates.json
-uv run python -m lockon.harness.eval --policy scripted --vs static --n 20
-uv run python -m lockon.harness.sweep --config configs/sweep_local.yaml
+uv run python -m lockon.harness.eval --policy scripted --vs static --n 20 --seed-base 1000
+uv run python -m lockon.harness.sweep --config configs/sweep_local.yaml --workers 6
 uv run python -m lockon.harness.train --config configs/ppo_local.yaml --out runs/ppo_local
-uv run python -m lockon.demo.render_all && uv run python -m lockon.demo.viewer
+uv run python -m lockon.demo.render_all --policy scripted && uv run python -m lockon.demo.viewer
 ```
 
 Windows 11 + GLFW offscreen rendering is the dev target; Linux uses EGL or OSMesa
-(`MUJOCO_GL`). State-only PPO trains on CPU by design (~2.9k env steps/s on a laptop).
+(`MUJOCO_GL`). State-only PPO trains on CPU by design (~2.9k env steps/s on a laptop; 6M steps
+≈ 35 min). The sweep is memory-bound: keep `--workers` ≤ 6 on 16 GB.
 
 ## Licences
 

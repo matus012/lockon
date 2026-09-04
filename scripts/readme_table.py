@@ -33,7 +33,7 @@ def main() -> int:
     arms = {name: _per_episode(*spec) for name, spec in FILES.items()}
     static = arms["static"]
     n = len(static)
-    print(f"| camera policy | lock retention % (mean) | ± std | 95 % CI of mean | Δ vs static (95 % CI) | time-to-reacquire |")
+    print("| camera policy | lock retention % (mean) | ± std | 95 % CI of mean | Δ vs static (95 % CI) | time-to-reacquire |")
     print("|---|---|---|---|---|---|")
     for name, v in arms.items():
         assert len(v) == n

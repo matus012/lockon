@@ -1,0 +1,977 @@
+[
+  {
+    "axis": "occluder_density",
+    "value": 0.0,
+    "policy": "static",
+    "retention_mean": 0.37374999999999997,
+    "retention_std": 0.2945117782025025,
+    "ttr_mean": 1.3692513368983956,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 14,
+      "occlusion": 24
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 0.25,
+    "policy": "scripted",
+    "retention_mean": 0.55075,
+    "retention_std": 0.37529746535248537,
+    "ttr_mean": 1.7654401154401154,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 28,
+      "fov": 18
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 0.25,
+    "policy": "static",
+    "retention_mean": 0.4159999999999999,
+    "retention_std": 0.3365286020533767,
+    "ttr_mean": 1.334325396825397,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 27,
+      "fov": 16
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 0.0,
+    "policy": "scripted",
+    "retention_mean": 0.6049999999999999,
+    "retention_std": 0.3349104357884358,
+    "ttr_mean": 1.7188982070561019,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 29,
+      "fov": 14
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 0.5,
+    "policy": "static",
+    "retention_mean": 0.45949999999999996,
+    "retention_std": 0.32973436278313484,
+    "ttr_mean": 1.1730769230769231,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 10,
+      "occlusion": 28
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 0.5,
+    "policy": "scripted",
+    "retention_mean": 0.56175,
+    "retention_std": 0.3356012328642432,
+    "ttr_mean": 2.5131448412698414,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 15,
+      "occlusion": 34
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 0.25,
+    "policy": "ppo",
+    "retention_mean": 0.48825,
+    "retention_std": 0.3532289448785306,
+    "ttr_mean": 1.6203869047619048,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 26,
+      "fov": 7
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 0.0,
+    "policy": "ppo",
+    "retention_mean": 0.5577499999999999,
+    "retention_std": 0.34546155719558724,
+    "ttr_mean": 1.4525458382799104,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 29,
+      "fov": 3
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 0.75,
+    "policy": "static",
+    "retention_mean": 0.46525,
+    "retention_std": 0.39249355090243204,
+    "ttr_mean": 2.4057291666666667,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 40,
+      "fov": 7
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 0.75,
+    "policy": "scripted",
+    "retention_mean": 0.6030000000000001,
+    "retention_std": 0.36841688343505646,
+    "ttr_mean": 2.3049719887955185,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 42,
+      "fov": 12
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 1.0,
+    "policy": "static",
+    "retention_mean": 0.373,
+    "retention_std": 0.3568977444591097,
+    "ttr_mean": 1.9752136752136755,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 33,
+      "fov": 5
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 0.5,
+    "policy": "ppo",
+    "retention_mean": 0.532,
+    "retention_std": 0.35783166433394353,
+    "ttr_mean": 1.169230769230769,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 24,
+      "fov": 2
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 1.0,
+    "policy": "scripted",
+    "retention_mean": 0.417,
+    "retention_std": 0.3634501341312175,
+    "ttr_mean": 2.422962962962963,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 38,
+      "fov": 18
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.0,
+    "policy": "static",
+    "retention_mean": 0.289,
+    "retention_std": 0.27343463569928367,
+    "ttr_mean": 1.435897435897436,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 24,
+      "fov": 6
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 0.75,
+    "policy": "ppo",
+    "retention_mean": 0.5747499999999999,
+    "retention_std": 0.37613652773959616,
+    "ttr_mean": 2.038562091503268,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 40,
+      "fov": 2
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.25,
+    "policy": "static",
+    "retention_mean": 0.289,
+    "retention_std": 0.27343463569928367,
+    "ttr_mean": 1.435897435897436,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 24,
+      "fov": 6
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.0,
+    "policy": "scripted",
+    "retention_mean": 0.34875,
+    "retention_std": 0.2928262069897433,
+    "ttr_mean": 1.1666666666666667,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 47,
+      "fov": 12
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.25,
+    "policy": "scripted",
+    "retention_mean": 0.34875,
+    "retention_std": 0.2928262069897433,
+    "ttr_mean": 1.1666666666666667,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 47,
+      "fov": 12
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.0,
+    "policy": "ppo",
+    "retention_mean": 0.3032499999999999,
+    "retention_std": 0.23673442398603545,
+    "ttr_mean": 1.314102564102564,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 36,
+      "fov": 1
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.5,
+    "policy": "static",
+    "retention_mean": 0.45949999999999996,
+    "retention_std": 0.32973436278313484,
+    "ttr_mean": 1.1730769230769231,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 10,
+      "occlusion": 28
+    }
+  },
+  {
+    "axis": "occluder_density",
+    "value": 1.0,
+    "policy": "ppo",
+    "retention_mean": 0.4287500000000001,
+    "retention_std": 0.34457537274158173,
+    "ttr_mean": 2.2695526695526698,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 50,
+      "fov": 4
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.5,
+    "policy": "scripted",
+    "retention_mean": 0.56175,
+    "retention_std": 0.3356012328642432,
+    "ttr_mean": 2.5131448412698414,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 15,
+      "occlusion": 34
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.25,
+    "policy": "ppo",
+    "retention_mean": 0.30025,
+    "retention_std": 0.22901132613912353,
+    "ttr_mean": 1.3168498168498166,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 36,
+      "fov": 1
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.75,
+    "policy": "static",
+    "retention_mean": 0.4215,
+    "retention_std": 0.3109023158485636,
+    "ttr_mean": 1.1895833333333334,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 10,
+      "occlusion": 28
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.75,
+    "policy": "scripted",
+    "retention_mean": 0.5479999999999999,
+    "retention_std": 0.33695103501844303,
+    "ttr_mean": 1.968954248366013,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 17,
+      "occlusion": 35
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 1.0,
+    "policy": "static",
+    "retention_mean": 0.33999999999999997,
+    "retention_std": 0.2914146530289786,
+    "ttr_mean": 1.387948548365215,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 26,
+      "fov": 8
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.5,
+    "policy": "ppo",
+    "retention_mean": 0.532,
+    "retention_std": 0.35783166433394353,
+    "ttr_mean": 1.169230769230769,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 24,
+      "fov": 2
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 1.0,
+    "policy": "scripted",
+    "retention_mean": 0.493,
+    "retention_std": 0.3025161152732198,
+    "ttr_mean": 1.44410122041701,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 40,
+      "fov": 19
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 0.75,
+    "policy": "ppo",
+    "retention_mean": 0.5002500000000001,
+    "retention_std": 0.3427479941589739,
+    "ttr_mean": 1.366936026936027,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 2,
+      "occlusion": 23
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.0,
+    "policy": "static",
+    "retention_mean": 0.8099999999999999,
+    "retention_std": 0.27983923956443274,
+    "ttr_mean": 2.300595238095238,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 9,
+      "fov": 3
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.0,
+    "policy": "scripted",
+    "retention_mean": 0.92025,
+    "retention_std": 0.16715617697231533,
+    "ttr_mean": 2.3725490196078427,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 12,
+      "fov": 1
+    }
+  },
+  {
+    "axis": "darkness",
+    "value": 1.0,
+    "policy": "ppo",
+    "retention_mean": 0.396,
+    "retention_std": 0.32512920508622417,
+    "ttr_mean": 1.3497237784002492,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 40,
+      "fov": 2
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.25,
+    "policy": "static",
+    "retention_mean": 0.62025,
+    "retention_std": 0.3173975228321733,
+    "ttr_mean": 1.2537037037037038,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 7,
+      "occlusion": 13
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.25,
+    "policy": "scripted",
+    "retention_mean": 0.7797499999999999,
+    "retention_std": 0.26112963734513167,
+    "ttr_mean": 1.2732142857142856,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 20,
+      "fov": 6
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.0,
+    "policy": "ppo",
+    "retention_mean": 0.8109999999999997,
+    "retention_std": 0.2885290280023831,
+    "ttr_mean": 1.4370535714285713,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 4,
+      "occlusion": 10
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.5,
+    "policy": "static",
+    "retention_mean": 0.45949999999999996,
+    "retention_std": 0.32973436278313484,
+    "ttr_mean": 1.1730769230769231,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 10,
+      "occlusion": 28
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.5,
+    "policy": "scripted",
+    "retention_mean": 0.56175,
+    "retention_std": 0.3356012328642432,
+    "ttr_mean": 2.5131448412698414,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 15,
+      "occlusion": 34
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.75,
+    "policy": "static",
+    "retention_mean": 0.3005000000000001,
+    "retention_std": 0.2746948306757883,
+    "ttr_mean": 1.2,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 19,
+      "occlusion": 31
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.25,
+    "policy": "ppo",
+    "retention_mean": 0.71325,
+    "retention_std": 0.30949666799498826,
+    "ttr_mean": 1.1203663003663005,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 2,
+      "occlusion": 13
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.75,
+    "policy": "scripted",
+    "retention_mean": 0.48249999999999993,
+    "retention_std": 0.3254708128235157,
+    "ttr_mean": 3.0561575507395937,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 16,
+      "occlusion": 39
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.5,
+    "policy": "ppo",
+    "retention_mean": 0.532,
+    "retention_std": 0.35783166433394353,
+    "ttr_mean": 1.169230769230769,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 24,
+      "fov": 2
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 1.0,
+    "policy": "static",
+    "retention_mean": 0.26675,
+    "retention_std": 0.2829057926236223,
+    "ttr_mean": 2.3249999999999997,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 27,
+      "occlusion": 37
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 1.0,
+    "policy": "scripted",
+    "retention_mean": 0.30199999999999994,
+    "retention_std": 0.2809644105576363,
+    "ttr_mean": 3.2991596638655465,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 28,
+      "occlusion": 48
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 0.75,
+    "policy": "ppo",
+    "retention_mean": 0.40599999999999997,
+    "retention_std": 0.34745359402371995,
+    "ttr_mean": 1.6888888888888889,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 53,
+      "fov": 3
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.0,
+    "policy": "static",
+    "retention_mean": 0.7375,
+    "retention_std": 0.2727200946025063,
+    "ttr_mean": 1.8074404761904763,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 8,
+      "fov": 9
+    }
+  },
+  {
+    "axis": "prey_speed",
+    "value": 1.0,
+    "policy": "ppo",
+    "retention_mean": 0.37899999999999995,
+    "retention_std": 0.33240637779681664,
+    "ttr_mean": 1.714920634920635,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 3,
+      "occlusion": 52
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.0,
+    "policy": "scripted",
+    "retention_mean": 0.90525,
+    "retention_std": 0.15227011361393278,
+    "ttr_mean": 1.5972222222222223,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 11,
+      "fov": 4
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.25,
+    "policy": "static",
+    "retention_mean": 0.54225,
+    "retention_std": 0.329395184391029,
+    "ttr_mean": 1.4294871794871797,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 9,
+      "occlusion": 16
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.0,
+    "policy": "ppo",
+    "retention_mean": 0.8632500000000001,
+    "retention_std": 0.20178748102892802,
+    "ttr_mean": 1.9075617283950617,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 9,
+      "fov": 1
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.25,
+    "policy": "scripted",
+    "retention_mean": 0.6737500000000001,
+    "retention_std": 0.3284770730203251,
+    "ttr_mean": 2.6240896358543417,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 26,
+      "fov": 14
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.5,
+    "policy": "static",
+    "retention_mean": 0.45949999999999996,
+    "retention_std": 0.32973436278313484,
+    "ttr_mean": 1.1730769230769231,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 10,
+      "occlusion": 28
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.5,
+    "policy": "scripted",
+    "retention_mean": 0.56175,
+    "retention_std": 0.3356012328642432,
+    "ttr_mean": 2.5131448412698414,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 15,
+      "occlusion": 34
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.25,
+    "policy": "ppo",
+    "retention_mean": 0.63425,
+    "retention_std": 0.3357501861503579,
+    "ttr_mean": 1.9857653602751644,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 5,
+      "occlusion": 25
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.5,
+    "policy": "ppo",
+    "retention_mean": 0.532,
+    "retention_std": 0.35783166433394353,
+    "ttr_mean": 1.169230769230769,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 24,
+      "fov": 2
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.75,
+    "policy": "scripted",
+    "retention_mean": 0.5820000000000001,
+    "retention_std": 0.313458131175441,
+    "ttr_mean": 3.8831296154825568,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 60,
+      "fov": 16
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.75,
+    "policy": "static",
+    "retention_mean": 0.36324999999999996,
+    "retention_std": 0.2883109215759958,
+    "ttr_mean": 2.3916666666666666,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 45,
+      "fov": 15
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 1.0,
+    "policy": "static",
+    "retention_mean": 0.298,
+    "retention_std": 0.2640804801570915,
+    "ttr_mean": 3.369357638888889,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 114,
+      "fov": 20
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 1.0,
+    "policy": "scripted",
+    "retention_mean": 0.379,
+    "retention_std": 0.2969831645060036,
+    "ttr_mean": 3.35046685340803,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 82,
+      "fov": 23
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 0.75,
+    "policy": "ppo",
+    "retention_mean": 0.49000000000000005,
+    "retention_std": 0.3341032774457623,
+    "ttr_mean": 2.730273199023199,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 52,
+      "fov": 4
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.0,
+    "policy": "scripted",
+    "retention_mean": 0.56475,
+    "retention_std": 0.35100382832670074,
+    "ttr_mean": 2.5586805555555556,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 32,
+      "fov": 14
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.0,
+    "policy": "static",
+    "retention_mean": 0.4912500000000001,
+    "retention_std": 0.3392560795328508,
+    "ttr_mean": 1.2936507936507937,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 10,
+      "occlusion": 28
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.0,
+    "policy": "ppo",
+    "retention_mean": 0.539,
+    "retention_std": 0.36049826629264115,
+    "ttr_mean": 1.279248529248529,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 3,
+      "occlusion": 21
+    }
+  },
+  {
+    "axis": "prey_aggressiveness",
+    "value": 1.0,
+    "policy": "ppo",
+    "retention_mean": 0.36549999999999994,
+    "retention_std": 0.31959701187589346,
+    "ttr_mean": 2.7357609710550888,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 96,
+      "fov": 9
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.25,
+    "policy": "static",
+    "retention_mean": 0.49399999999999994,
+    "retention_std": 0.33835484332280513,
+    "ttr_mean": 1.3058608058608057,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 10,
+      "occlusion": 28
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.25,
+    "policy": "scripted",
+    "retention_mean": 0.5249999999999999,
+    "retention_std": 0.3330127625181954,
+    "ttr_mean": 2.560763888888889,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 17,
+      "occlusion": 34
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.5,
+    "policy": "static",
+    "retention_mean": 0.45949999999999996,
+    "retention_std": 0.32973436278313484,
+    "ttr_mean": 1.1730769230769231,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 10,
+      "occlusion": 28
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.75,
+    "policy": "static",
+    "retention_mean": 0.45825000000000005,
+    "retention_std": 0.3284938165323664,
+    "ttr_mean": 1.1630036630036629,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 10,
+      "occlusion": 28
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.5,
+    "policy": "scripted",
+    "retention_mean": 0.56175,
+    "retention_std": 0.3356012328642432,
+    "ttr_mean": 2.5131448412698414,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 15,
+      "occlusion": 34
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.25,
+    "policy": "ppo",
+    "retention_mean": 0.5589999999999999,
+    "retention_std": 0.33737812614335266,
+    "ttr_mean": 1.211111111111111,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 2,
+      "occlusion": 22
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.75,
+    "policy": "scripted",
+    "retention_mean": 0.55325,
+    "retention_std": 0.3432064793968785,
+    "ttr_mean": 2.5591517857142856,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 16,
+      "occlusion": 36
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.5,
+    "policy": "ppo",
+    "retention_mean": 0.532,
+    "retention_std": 0.35783166433394353,
+    "ttr_mean": 1.169230769230769,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 24,
+      "fov": 2
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 1.0,
+    "policy": "static",
+    "retention_mean": 0.45575,
+    "retention_std": 0.32908310120697476,
+    "ttr_mean": 1.1417451596023025,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 10,
+      "occlusion": 28
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 0.75,
+    "policy": "ppo",
+    "retention_mean": 0.5295,
+    "retention_std": 0.3629390444689025,
+    "ttr_mean": 1.3272977022977022,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 2,
+      "occlusion": 24
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 1.0,
+    "policy": "scripted",
+    "retention_mean": 0.57625,
+    "retention_std": 0.3527955321429113,
+    "ttr_mean": 1.7332621082621082,
+    "n": 20,
+    "loss_cause_histogram": {
+      "occlusion": 36,
+      "fov": 13
+    }
+  },
+  {
+    "axis": "channel_dropout",
+    "value": 1.0,
+    "policy": "ppo",
+    "retention_mean": 0.5452499999999999,
+    "retention_std": 0.34497273442983867,
+    "ttr_mean": 1.3386243386243386,
+    "n": 20,
+    "loss_cause_histogram": {
+      "fov": 2,
+      "occlusion": 25
+    }
+  }
+]

@@ -33,6 +33,12 @@ ALLOWED_TRACKED_VISUALS: dict[str, str] = {
     "reports/gifs/sensor_3ch.gif": "sim-render",
     "reports/gifs/occlusion_lock.gif": "sim-render",
     "reports/gifs/lights_cut_lock.gif": "sim-render",
+    "reports/curves/summary.png": "plot",
+    "reports/curves/occluder_density.png": "plot",
+    "reports/curves/darkness.png": "plot",
+    "reports/curves/prey_speed.png": "plot",
+    "reports/curves/prey_aggressiveness.png": "plot",
+    "reports/curves/channel_dropout.png": "plot",
 }
 
 

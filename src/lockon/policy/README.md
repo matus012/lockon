@@ -13,11 +13,17 @@ Import rule (`tests/test_boundaries.py`): `policy` may import `lockon.core` + th
 
 ## Public API
 - `Hunter` / `Prey` protocols (`base.py`) — `reset(...)`, `act(...)`.
-- `ObsBuilder(layout)` — `.reset(state) -> AgentObs`; `.step(state) -> AgentObs`; `.steps_since_seen` (property).
+- `ObsBuilder(layout)` — `.reset(state) -> AgentObs`; `.step(state, seen: bool | None = None) -> AgentObs`
+  (`seen` defaults to state visibility; the harness passes the frozen tracker's lock instead, D15,
+  so the policy observes the same quantity the reward pays for); `.steps_since_seen` (property).
 - `RewardConfig(visible=1.0, action_l2=0.01, lost_penalty=10.0, lost_after=20)`.
 - `reward(state, action, steps_since_seen, cfg, visible: bool | None = None) -> float`.
-- `StaticCamera()`, `ScriptedHunter(standoff_m=6.0, gain_yaw=2.0, gain_v=1.0)`, `PPOHunter(path)` — `.act_vector(vector)` (frame-stacked; `.act(obs)` raises `NotImplementedError`).
-- `ScriptedPrey()` — `.reset(layout, difficulty, seed)`, `.act(state, illumination) -> tuple[float, float]`.
+- `StaticCamera()`, `ScriptedHunter(standoff_m=6.0, gain_yaw=2.0, gain_v=1.0)`, `PPOHunter(path)` — `.act_vector(vector)` (frame-stacked; `.act(obs)` raises `NotImplementedError`);
+  `.n_stack` (property, frame-stack depth read back from the loaded model, never a default);
+  `.obs_seen` ("lock"/"state", read from the sidecar `<path>.obs.json` when present — which
+  observation convention the checkpoint trained with).
+- `ScriptedPrey(los_break: bool = True)` — `.reset(layout, difficulty, seed)`, `.act(state, illumination) -> tuple[float, float]`;
+  `los_break=False` disables the LOS-break lateral term (measurement arm only, not the default).
 - `PPOConfig(...)` (SB3 hyperparams + scheduling knobs, `.from_yaml(path)`); `make_ppo(env, seed, cfg) -> PPO` (device pinned to `"cpu"`, asserted).
 
 ## Deviations from SPEC

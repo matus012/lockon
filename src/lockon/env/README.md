@@ -13,7 +13,14 @@ Import rule (`tests/test_boundaries.py`): `env` may import `lockon.core` + third
 ## Public API
 - `Env(difficulty, seed, half_size=12.0)` — builds the arena and places drone+person with a clear line of sight.
 - `.reset(seed=None) -> WorldState`; `.step(action: AgentAction, person_velocity: tuple[float, float]) -> WorldState`; `.state() -> WorldState`.
-- `.set_darkness(darkness: float) -> None`; `.darkness` (property); `.set_channels_alive(alive: Mapping[str, bool]) -> None`.
+- `.set_darkness(darkness: float) -> None` (scales the point lights AND the camera headlight fill
+  by `1 - darkness`, so rgb reads as a normal camera at darkness 0); `.darkness` (property, current
+  dial — a scripted lights-cut moves it mid-episode); `.set_channels_alive(alive: Mapping[str, bool]) -> None`.
+- `.step` applies drone velocity/yaw commands through a first-order filter (`DRONE_CMD_ALPHA =
+  1/3`, tau 0.3 s at 10 Hz) before integrating — kinematic only, no flight physics (D14, deviation
+  row 9: without it a Gaussian exploration policy thrashed the camera every step).
+- Channel dropout draws from its own RNG stream (`reset`'s `_dropout_rng`), so the schedule doesn't
+  shift with the number of pillar-placement draws when `occluder_density` changes (review F7).
 - `.illumination(xy) -> float`; `.line_of_sight(a_xyz, b_xyz) -> bool`; `.person_bbox_world() -> FloatArray` (8,3).
 - `.project(points_world) -> tuple[FloatArray, FloatArray]` (pixels, depth); `.person_max_speed() -> float`.
 - `arena.build_layout(difficulty, rng, half_size) -> ArenaLayout`; `arena.build_mjcf(layout) -> str`.

@@ -25,7 +25,7 @@ GATES: dict[str, list[list[str]]] = {
     "G4": [PY + ["-m", "lockon.harness.eval", "--policy", "scripted", "--vs", "static", "--n", "20", "--seed-base", "1000", "--json", "reports/eval_scripted_vs_static.json"]],
     "G5": [PY + ["-m", "lockon.harness.eval", "--policy", "runs/ppo_local/best.zip", "--vs", "static", "--n", "20", "--seed-base", "1000", "--json", "reports/eval_ppo_vs_static.json"]],
     "G6": [PY + ["-m", "lockon.harness.sweep", "--config", "configs/sweep_local.yaml"]],
-    "G7": [PY + ["-m", "lockon.demo.render_all"], PY + ["-m", "lockon.demo.viewer", "--check"]],
+    "G7": [PY + ["-m", "lockon.demo.render_all", "--policy", "scripted"], PY + ["-m", "lockon.demo.viewer", "--check"]],
     "G8": [PY + ["-m", "pytest", "-q", "tests/test_license_guard.py"]],
     "G9": [PY + ["-m", "pytest", "-q"]],
 }

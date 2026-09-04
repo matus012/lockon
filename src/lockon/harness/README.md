@@ -13,15 +13,24 @@ Import rule (`tests/test_boundaries.py`): `harness` may import `core`, `env`, `s
 
 ## Public API
 - `episode.EpisodeResult` (seed, difficulty, policy, states, actions, gt_boxes, tracks, lock, retention, loss_causes, frames); `episode.Scene = Callable[[Env, int], None]`.
-- `episode.run_episode(difficulty, seed, hunter, prey, *, steps=EPISODE_STEPS, scene=None, capture=False, noise=None) -> EpisodeResult`.
+- `episode.run_episode(difficulty, seed, hunter, prey, *, steps=EPISODE_STEPS, scene=None, capture=False, noise=None) -> EpisodeResult` —
+  a fresh `LockTracker` + a `NoiseInjector` reseeded with the episode `seed` each call (`noise`
+  given, else `EVAL_NOISE`'s dial); a `PPOHunter` gets an SB3-style stacked vector (`hunter.n_stack`
+  frames, zero-filled history at episode start, newest last — matches `VecFrameStack`).
 - `episode.resolve_hunter(name_or_path) -> Hunter` — `"static"`/`"scripted"`/path→`PPOHunter`.
-- `episode.EVAL_NOISE: NoiseConfig` — the frozen eval-time noise constant.
+- `episode.EVAL_NOISE: NoiseConfig` — the frozen eval-time noise dial (per-episode seed, not shared).
 - `scenes.SCENES: dict[str, SceneSpec]` — `"occlusion"`, `"lights_cut"`, `"sensor3"`, `"chase"` (built lazily; `occlusion` runs a seed search).
 - `scenes.select_occlusion_seed() -> int`; `scenes.occlusion_showcase_ok(states, retained) -> bool`.
-- `gym_env.LockonGym(difficulty, seed, prey, reward)` — `gymnasium.Env`, obs `Box((AgentObs.size(),))`, action `Box((3,))`.
-- `eval.evaluate(policy_name_or_path, difficulty, seeds) -> dict[str, Any]` — retention mean/std, ttr, loss-cause histogram.
+- `gym_env.LockonGym(difficulty, seed, prey, reward)` — `gymnasium.Env`, obs `Box((AgentObs.size(),))`,
+  action `Box((3,))`; runs its own frozen `LockTracker` in `step()` and rewards/observes its lock,
+  not raw state visibility (D13/D15); `reset()` resamples layout + prey seed every call.
+- `eval.evaluate(policy_name_or_path, difficulty, seeds) -> dict[str, Any]` — retention mean/std,
+  ttr, loss-cause histogram; CLI adds `--seed-base` (gates use 1000, held out from 0..19 model selection).
 - `train.train(...)`, `train.build_vec_env(cfg, seed, start_dial, overrides=None) -> VecFrameStack`.
-- `sweep.run_sweep(...)`, `sweep.write_curves(rows, cfg)`, `sweep.write_failure_report(rows, cfg)`.
+- `sweep.run_sweep(..., workers=None) -> list[dict]` — `multiprocessing.Pool` (spawn), default
+  `min(6, cpu_count()//2)` (memory-bound, `--workers` overrides); each cell is saved to
+  `results.json` as it finishes (`imap_unordered`, not `starmap` — a mid-sweep crash loses only
+  in-flight cells). `sweep.write_curves(rows, cfg)`, `sweep.write_failure_report(rows, cfg)`.
 - CLIs: `bench_env.py`, `render.py`, `train.py`, `eval.py`, `sweep.py` (each `main(argv=None) -> int`, see gates below).
 
 ## Deviations from SPEC
@@ -34,12 +43,11 @@ Import rule (`tests/test_boundaries.py`): `harness` may import `core`, `env`, `s
 - `run_episode` produces consistent lengths, retention in [0,1], `gt_boxes[t] is None` iff not visible: `test_run_episode_basic_consistency`.
 - `occlusion` scene genuinely occludes then recovers: `test_occlusion_scene_actually_occludes`.
 - `lights_cut` scene kills rgb, thermal proxy keeps seeing: `test_lights_cut_scene_kills_rgb_keeps_thermal`.
-- `LockonGym` passes `gymnasium`'s `check_env` plus 20 random steps: `test_lockon_gym_check_env_and_random_steps`.
-- Layout + prey reseed every episode (SB3 calls `reset(seed=None)`): `test_gym_resamples_layout_every_episode`.
+- `LockonGym` passes `gymnasium`'s `check_env` plus 20 random steps, and reseeds layout + prey every
+  episode (SB3 calls `reset(seed=None)`): `test_lockon_gym_check_env_and_random_steps`, `test_gym_resamples_layout_every_episode`.
 - `evaluate("static"/"scripted", ...)` returns finite numbers: `test_evaluate_returns_finite_numbers`.
 - Render smoke produces a real GIF file: `test_render_smoke_produces_a_gif`.
-- Training smoke writes `best.zip` + a log: `test_train_smoke_writes_best_and_log`.
-- Frame-stack order matches SB3's `VecFrameStack`: `test_frame_stack_ordering_matches_vecframestack`.
+- Training smoke writes `best.zip` + a log, frame-stack order matches SB3's `VecFrameStack`: `test_train_smoke_writes_best_and_log`, `test_frame_stack_ordering_matches_vecframestack`.
 - Sweep smoke writes outputs and resumes (skips completed cells): `test_sweep_smoke_writes_outputs_and_resumes`.
 
 ## Gates (plan.md §3)
