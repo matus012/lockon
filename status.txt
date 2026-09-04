@@ -1,5 +1,5 @@
-STATUS: 4/12 — IN PROGRESS — G0 G1 G8 PASS; G4 (scripted vs static, n=20) running; render + train/sweep CLIs building
-RETENTION: static 0.45 · scripted 0.63 · ppo n/a (5 episodes, preview only)
+STATUS: 4/12 — D1 PASS — G0 G1 G4 G8 PASS @8c8ef15; scripted hunter beats static (n=20, same seeds); render + train/sweep CLIs building
+RETENTION: static 37.5% · scripted 55.4% · ppo n/a (20 episodes, mid difficulty, noise dial 0.3)
 HPC: 0/0 · 0/70-100 GPU-h
 NEEDS YOU: none
 ppo_vs_scripted: 0 of 3
