@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lockon"
+version = "0.1.0"
+description = "Active perception under degradation: a simulated drone camera learns to keep lock on an evading person (MuJoCo, state-PPO, noisy-GT ByteTrack)."
+requires-python = ">=3.11,<3.12"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "numpy>=1.26",
+    "mujoco>=3.12",
+    "gymnasium>=1.3,<2",
+    "stable-baselines3>=2.9",
+    "torch>=2.8",
+    "trackers>=2.6",
+    "av>=14",
+    "imageio>=2.34",
+    "pillow>=10",
+    "gradio>=5",
+    "pyyaml>=6",
+    "matplotlib>=3.8",
+]
+
+[dependency-groups]
+dev = ["pytest>=8", "mypy>=1.10", "ruff>=0.5", "types-PyYAML"]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu126" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["render: needs the MuJoCo offscreen renderer"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_ignores = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

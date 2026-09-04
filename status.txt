@@ -1,0 +1,5 @@
+STATUS: 1/12 — IN PROGRESS — plan.md + skeleton written; venv + deps + render probe next
+RETENTION: static n/a · scripted n/a · ppo n/a (0 episodes)
+HPC: 0/0 · 0/70-100 GPU-h
+NEEDS YOU: none
+ppo_vs_scripted: 0 of 3

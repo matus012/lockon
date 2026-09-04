@@ -1,0 +1,66 @@
+# 110_lockon — anchored .gitignore (P1 pattern; tests/test_license_guard.py enforces).
+# Directory patterns are LEADING-SLASH ANCHORED: an unanchored `data/` once silently excluded
+# ws/100's src/omot/data package from every commit (P1 D47). Never add an unanchored dir name.
+
+# --- weights / checkpoints / runs (never committed) ---
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.ckpt
+*.zip
+/runs/
+/checkpoints/
+/weights/
+/data/
+/videos/
+/dist/
+
+# --- visuals: default-deny; committed ones are negated below and allowlisted per file ---
+*.mp4
+*.gif
+*.png
+*.jpg
+*.avi
+*.webm
+!reports/gifs/*.gif
+!reports/curves/*.png
+!demo/shots/*.mp4
+!demo/assets/*.png
+
+# --- environment / derived ---
+/.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+/.cache/
+/.pytest_cache/
+/.mypy_cache/
+/.ruff_cache/
+*.npy
+*.npz
+!tests/fixtures/**/*.npz
+/reports/gates.json
+/logs/
+
+# --- Claude Code decoy binds (ws/000_infra/templates/gitignore) ---
+.bash_profile
+.bashrc
+.gitconfig
+.github
+.idea
+.mcp.json
+.profile
+.ripgreprc
+.vscode
+.zprofile
+.zshrc
+.env*
+.npmrc
+.yarnrc
+node_modules/
+package.json
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bunfig.toml
