@@ -105,11 +105,16 @@ def _save_results(path: Path, rows: list[dict[str, Any]]) -> None:
     path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
 
 
+def _run_cell_star(args: tuple[Any, ...]) -> dict[str, Any]:
+    return _run_cell(*args)
+
+
 def run_sweep(
     cfg: SweepConfig,
     *,
     policy_filter: list[str] | None = None,
     values_override: list[float] | None = None,
+    workers: int | None = None,
 ) -> list[dict[str, Any]]:
     values = values_override if values_override is not None else cfg.values
     policy_names = policy_filter if policy_filter is not None else list(cfg.policies)
@@ -139,8 +144,12 @@ def run_sweep(
 
     if pending:
         ctx = mp.get_context("spawn")
-        with ctx.Pool(processes=mp.cpu_count()) as pool:
-            for row in pool.starmap(_run_cell, pending):
+        # cpu_count() workers (20 logical cores here) each holding MuJoCo models exhausted 16 GB
+        # (mujoco.FatalError: Could not allocate memory, 2026-09-04); starmap also returned nothing
+        # until every cell finished, so the crash lost all rows. imap_unordered + per-cell save.
+        n_workers = workers if workers is not None else max(1, min(6, mp.cpu_count() // 2))
+        with ctx.Pool(processes=n_workers) as pool:
+            for row in pool.imap_unordered(_run_cell_star, pending):
                 rows.append(row)
                 _save_results(results_path, rows)
                 logger.info(
@@ -239,6 +248,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--policies", type=str, default=None, help="comma-separated policy names")
     parser.add_argument("--n", type=int, default=None, help="episodes per cell (overrides config)")
     parser.add_argument("--values", type=str, default=None, help="comma-separated dial values")
+    parser.add_argument("--workers", type=int, default=None, help="pool size (default min(6, cores/2); memory-bound)")
     args = parser.parse_args(argv)
 
     cfg = SweepConfig.from_yaml(args.config)
@@ -247,7 +257,7 @@ def main(argv: list[str] | None = None) -> int:
     policy_filter = args.policies.split(",") if args.policies is not None else None
     values_override = [float(v) for v in args.values.split(",")] if args.values is not None else None
 
-    rows = run_sweep(cfg, policy_filter=policy_filter, values_override=values_override)
+    rows = run_sweep(cfg, policy_filter=policy_filter, values_override=values_override, workers=args.workers)
     write_curves(rows, cfg)
     write_failure_report(rows, cfg)
     print(f"sweep complete: {len(rows)} cells; results -> {Path(cfg.out_dir) / 'results.json'}")
