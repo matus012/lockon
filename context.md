@@ -6,23 +6,25 @@ graph, §3 gates) → 4. `project.md` only when a decision is questioned (it is 
 Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doctrines.md`.
 
 ## Position
-- **Step 5 of 12 — PPO run 3 in flight** (2026-09-04, ~4.5 h in). Gates PASS: G0 G1 G2 G3 G4
-  G8. Committed through "visual + RL instrument fixes" (see git log). D1 status passed:
-  scripted 55.4 % vs static 37.5 % retention (n=20, same seeds, mid difficulty).
-- PPO history (all instrument, none design rejections; counter stays 0 of 3):
-  run 1 (runs/ppo_local_v0): trained on 8 fixed layouts, deterministic prey → below static.
-  run 2 (runs/ppo_local_v1): fresh layouts, still below static; measured reward ↑ visibility ↑
-  retention ↓ (box jumps 8.5 px/step, 5.6 ids/episode) → reward now = tracker lock (D13).
-  run 3 (runs/ppo_local): lock reward; eval every 200k vs static; best.zip by retention.
-  G5 = `check_gates.py G5` once run 3 ends (~35 min at 2.9k steps/s for 6M steps).
-- In flight: demo package (render_all + viewer, impl agent). Queued after training frees the
-  CPU: G6 sweep (`python -m lockon.harness.sweep --config configs/sweep_local.yaml`),
-  per-package READMEs, root README, G7, C6 rotation pass, then step 6 STOP for HPC approval.
-- Known honest properties for the README: ByteTrack coast keeps the id in 16/20 seeds across a
-  2 s gap at noise 0.3; darkness alone never breaks lock (thermal proxy is dark-immune); the
-  prey's LOS-break fires on visibility so it examines a mover harder than a static camera
-  (conservative bias for G4/G5).
-- Session ritual (plan §8): every ~2 h commit → update this file + status.txt → compaction.
+- **Step 5 of 12 — PPO run 5 in flight** (2026-09-04, ~8 h in). Gates PASS at HEAD: G0 G1 G2 G3
+  G4 (per-episode noise, seeds 1000–1019: scripted 56.2 % vs static 46.0 %) G8. G5 passed on
+  run 4 (54.5 vs 44.2) BEFORE deviation rows 11–12; it is re-run on run 5's best.zip when the
+  run ends (`check_gates.py G5`), then PPO vs scripted (`eval --policy runs/ppo_local/best.zip
+  --vs scripted --n 20 --seed-base 1000 --json reports/eval_ppo_vs_scripted.json`).
+- Then, in order (all one-command): `sweep --config configs/sweep_local.yaml --workers 6` (G6,
+  ~20 min, memory-bound — never run with the render or training), `demo.render_all --policy
+  scripted` + the three GIF renders (commands in runs/render_final.log), `check_gates.py G6 G7 G8
+  G9`, `scripts/readme_table.py` → paste into README (PPO row + n + CI), C6 pass 2 on the
+  package READMEs (mech), status.txt = NEEDS YOU "approve HPC launch" with
+  reports/hpc_launch_plan.md, session report + strejc-nav.
+- PPO history: runs 1–3 instrument-defective (fixed layouts; visibility reward; std-1
+  exploration); run 4 = fork count 1 (tie with scripted, row 10); run 5 = pre-registered
+  observation change (row 12, D15) — if it does not beat scripted it stays a tie, hero = scripted.
+- Two fresh-context lead reviews done (rows 2–6, 7–12). Known honest properties for the README:
+  ByteTrack coast 16/20 across a 2 s gap; darkness alone never breaks lock (thermal proxy);
+  1-step detection latency handicaps movers; prey LOS-break bias +0.065 conservative
+  (reports/los_break_bias.json); n = 20 local gates are direction-only (CI ±0.17).
+- Ritual (plan §8) every ~2 h: commit → this file + status.txt → compaction.
 
 ## Architecture (plan §9 D1, D4)
 ```
