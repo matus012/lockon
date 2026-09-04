@@ -61,7 +61,9 @@ class Env:
 - In-FOV: torso centre projects inside the image. LOS: `mj_ray` from camera position to torso
   centre AND to head centre with `geomgroup` mask excluding groups 2 and 3 (drone + person); a
   point is clear if the ray hits nothing before the point distance. Unoccluded if either clear.
-- `channels_see[c]` per `core/schemas.py`; `person_visible = any(channels_see)`.
+- `channels_see[c] = alive[c] and in_fov and unoccluded and core.channel_sees(c, illumination_at_person, range_m)`
+  iterating `core.CHANNELS`; range_m = camera position → torso centre. The literal channel names
+  never appear in this package (sensor test 7 greps for them). `person_visible = any(channels_see)`.
 - Raycasts: N_RAYCASTS horizontal rays from the drone position at its altitude, angles
   yaw + k*2π/N, `mj_ray` against groups 0/1 (walls, pillars), distance / (2*half_size) clipped
   to [0,1]; 1.0 if nothing hit.

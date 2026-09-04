@@ -5,17 +5,17 @@ Every other package imports this one; this one imports none of them (plan.md §9
 
 from lockon.core.metrics import RetentionResult, iou_xyxy, retention
 from lockon.core.schemas import (
+    CHANNEL_SPECS,
     CHANNELS,
     CONTROL_HZ,
-    DEPTH_MAX_RANGE_M,
     EPISODE_STEPS,
     IMAGE_HEIGHT,
     IMAGE_WIDTH,
     N_RAYCASTS,
-    RGB_MIN_ILLUMINATION,
     AgentAction,
     AgentObs,
     ArenaLayout,
+    ChannelSpec,
     Detection,
     Difficulty,
     LockStatus,
@@ -23,20 +23,22 @@ from lockon.core.schemas import (
     SensorFrame,
     Track,
     WorldState,
+    channel_sees,
+    person_max_speed,
 )
 
 __all__ = [
     "CHANNELS",
+    "CHANNEL_SPECS",
     "CONTROL_HZ",
-    "DEPTH_MAX_RANGE_M",
     "EPISODE_STEPS",
     "IMAGE_HEIGHT",
     "IMAGE_WIDTH",
     "N_RAYCASTS",
-    "RGB_MIN_ILLUMINATION",
     "AgentAction",
     "AgentObs",
     "ArenaLayout",
+    "ChannelSpec",
     "Detection",
     "Difficulty",
     "LockStatus",
@@ -45,6 +47,8 @@ __all__ = [
     "SensorFrame",
     "Track",
     "WorldState",
+    "channel_sees",
     "iou_xyxy",
+    "person_max_speed",
     "retention",
 ]

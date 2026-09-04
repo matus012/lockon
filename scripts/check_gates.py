@@ -42,7 +42,7 @@ def run_gate(name: str) -> bool:
     ok = True
     for cmd in GATES[name]:
         print(f"[{name}] $ {' '.join(cmd)}", flush=True)
-        rc = subprocess.run(cmd, cwd=ROOT).returncode
+        rc = subprocess.run(cmd, cwd=ROOT, check=False).returncode
         print(f"[{name}] exit {rc}", flush=True)
         ok = ok and rc == 0
         if not ok:

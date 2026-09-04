@@ -19,13 +19,38 @@ import numpy.typing as npt
 FloatArray = npt.NDArray[np.float64]
 
 CHANNELS: Final[tuple[str, ...]] = ("rgb", "depth", "thermal")
+
+
+@dataclass(frozen=True)
+class ChannelSpec:
+    """State-level physics of a sensing channel (what env needs to decide `channels_see`).
+
+    Rendering lives in lockon.sensor; this is the only other place a channel is defined.
+    Adding a channel = one entry here + one renderer in sensor (project.md §4, gate G2).
+    """
+
+    min_illumination: float  # channel sees only if illumination at the target >= this
+    max_range_m: float  # channel sees only if camera-target range <= this
+    dark_immune: bool  # True: unaffected by lights-cut (depth, thermal)
+
+
+CHANNEL_SPECS: Final[dict[str, ChannelSpec]] = {
+    "rgb": ChannelSpec(min_illumination=0.15, max_range_m=60.0, dark_immune=False),
+    "depth": ChannelSpec(min_illumination=0.0, max_range_m=20.0, dark_immune=True),
+    "thermal": ChannelSpec(min_illumination=0.0, max_range_m=60.0, dark_immune=True),
+}
+assert tuple(CHANNEL_SPECS) == CHANNELS
+
+
+def channel_sees(channel: str, illumination: float, range_m: float) -> bool:
+    """Channel physics only — caller ANDs this with alive / in-FOV / line-of-sight."""
+    spec = CHANNEL_SPECS[channel]
+    return illumination >= spec.min_illumination and range_m <= spec.max_range_m
 N_RAYCASTS: Final[int] = 16
 CONTROL_HZ: Final[int] = 10
 EPISODE_STEPS: Final[int] = 200
 IMAGE_WIDTH: Final[int] = 640
 IMAGE_HEIGHT: Final[int] = 480
-RGB_MIN_ILLUMINATION: Final[float] = 0.15
-DEPTH_MAX_RANGE_M: Final[float] = 20.0
 
 
 @dataclass(frozen=True)
@@ -45,6 +70,11 @@ class Difficulty:
 
     def replace(self, **kw: float) -> Difficulty:
         return Difficulty(**{**vars(self), **kw})
+
+
+def person_max_speed(difficulty: Difficulty) -> float:
+    """Prey speed limit in m/s from the dial: 0.6 (dial 0) to 2.2 (dial 1). Env clamps, prey plans."""
+    return 0.6 + 1.6 * difficulty.prey_speed
 
 
 @dataclass(frozen=True)
@@ -80,9 +110,8 @@ class WorldState:
     illumination_at_person: float  # [0, 1], from the light field
     channels_alive: dict[str, bool] = field(default_factory=lambda: dict.fromkeys(CHANNELS, True))
     channels_see: dict[str, bool] = field(default_factory=lambda: dict.fromkeys(CHANNELS, False))
-    # channels_see[c] = alive[c] AND in-FOV AND unoccluded AND channel physics permit (rgb needs
-    # illumination >= RGB_MIN_ILLUMINATION, depth needs range <= DEPTH_MAX_RANGE_M, thermal always).
-    # person_visible == any(channels_see.values()). Single source: lockon.env.
+    # channels_see[c] = alive[c] AND in-FOV AND unoccluded AND channel_sees(c, illum, range).
+    # person_visible == any(channels_see.values()). Computed in lockon.env only.
 
 
 @dataclass(frozen=True)

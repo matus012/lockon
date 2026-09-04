@@ -6,8 +6,10 @@ graph, §3 gates) → 4. `project.md` only when a decision is questioned (it is 
 Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doctrines.md`.
 
 ## Position
-- **Step 1 of 12 — in progress** (2026-09-04). plan.md written; repo skeleton, venv, deps and
-  the MuJoCo render probe next. No gate evaluated yet.
+- **Step 2 of 12 — in progress** (2026-09-04). Step 1 DONE (commit 8cbe538: render probe OK
+  via GLFW, G0 PASS, torch 2.14+cu126 cuda=True, mujoco 3.12, sb3 2.9, trackers 2.6).
+  Specs written for env/sensor/track/policy/harness (`src/lockon/<pkg>/SPEC.md`); impl
+  subagents building env, track, sensor concurrently. Next gates: G1 (env bench), G2, G3.
 - Session clock: started 2026-09-04. Ritual (plan §8) every ~2 h: commit → update this file +
   status.txt → compaction.
 
@@ -42,6 +44,13 @@ harness imports anything; demo imports harness + core; core imports numpy only.
   No `imageio-ffmpeg` (unstated ffmpeg build flags).
 - D8 2026-09-04: humanoid = hand-authored capsule MJCF in env; no dm_control dependency.
 - D9 2026-09-04: state-PPO trains on CPU by design (plan §8). GPU = rendering only.
+- D10 2026-09-04: channel physics is data in core (`CHANNEL_SPECS`, `channel_sees`); env iterates
+  `CHANNELS` and never names a channel; sensor owns renderers. Adding a channel = one core entry
+  + one sensor renderer (gate G2 wording "touches only sensor" read as sensor + registry line).
+- D11 2026-09-04: eval-time perception frozen at `NoiseConfig.from_dial(0.3)` + LockTracker
+  defaults (harness constant `EVAL_NOISE`); every owner-facing retention number uses it.
+- D12 2026-09-04: arena half-size 12 m, drone altitude 3 m, pillars 3.5 m tall (LOS is
+  horizontal geometry: the drone must go around, not over); 10 Hz, 200-step episodes.
 
 ## Environment
 Native Win11, PowerShell; uv venv `.venv` Python 3.11; torch cu126; RTX 4060 8 GB. Render:

@@ -1,0 +1,28 @@
+# Step-5 local PPO run (plan.md §5). One ≤5 h chained run; CPU by design (plan §8).
+name: ppo_local
+seed: 0
+total_steps: 6_000_000
+n_envs: 8
+frame_stack: 4
+n_steps: 1024
+batch_size: 256
+n_epochs: 10
+gamma: 0.99
+gae_lambda: 0.95
+learning_rate: 0.0003
+ent_coef: 0.01
+clip_range: 0.2
+net_arch: [128, 128]
+checkpoint_every: 100_000
+eval_every: 200_000
+eval_episodes: 20
+curriculum:
+  start_dial: 0.3
+  end_dial: 0.5
+  switch_fraction: 0.4
+reward:
+  visible: 1.0
+  action_l2: 0.01
+  lost_penalty: 10.0
+  lost_after: 20
+wall_hours: 5
