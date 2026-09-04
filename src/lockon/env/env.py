@@ -297,6 +297,8 @@ class Env:
             person=self._person_pose,
             person_visible=any(channels_see.values()),
             person_box=box,
+            in_fov=in_fov,
+            unoccluded=unoccluded,
             raycasts=rc,
             illumination_at_person=illum,
             channels_alive=alive,

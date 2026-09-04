@@ -30,8 +30,9 @@ LOS_BREAK_GAIN = 1.0
 class ScriptedPrey:
     """Cover-seek + dark-seek + LOS-break, mixed by `Difficulty` (SPEC.md `Prey`)."""
 
-    def __init__(self) -> None:
+    def __init__(self, los_break: bool = True) -> None:
         self.name = "scripted_prey"
+        self._los_break_enabled = los_break  # False = measurement arm only (README claim)
         self._layout: ArenaLayout | None = None
         self._difficulty: Difficulty | None = None
         self._rng: np.random.Generator | None = None
@@ -64,7 +65,7 @@ class ScriptedPrey:
 
         if self._evasive:
             speed = person_max_speed(self._difficulty)
-            if state.person_visible and aggressiveness > 0.0:
+            if self._los_break_enabled and state.person_visible and aggressiveness > 0.0:
                 direction = direction + self._los_break(person_xy, drone_xy, aggressiveness)
         else:
             speed = WANDER_SPEED_FRACTION * person_max_speed(self._difficulty)

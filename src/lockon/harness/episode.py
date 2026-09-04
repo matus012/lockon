@@ -31,7 +31,6 @@ from lockon.env.env import Env
 from lockon.policy.base import Hunter, Prey
 from lockon.policy.features import ObsBuilder
 from lockon.policy.hunters import PPOHunter, ScriptedHunter, StaticCamera
-from lockon.policy.ppo import PPOConfig
 from lockon.sensor.sensor import Sensor
 from lockon.track.noise import NoiseConfig, NoiseInjector
 from lockon.track.tracker import LockTracker
@@ -46,7 +45,6 @@ Scene = Callable[[Env, int], None]
 # EVAL_NOISE is a true single frozen constant, not re-seeded per episode/caller.
 EVAL_NOISE: NoiseConfig = NoiseConfig.from_dial(0.3, seed=0)
 
-_DEFAULT_FRAME_STACK: int = PPOConfig().frame_stack
 
 
 @dataclass
@@ -85,28 +83,28 @@ def _gt_detections(state: WorldState) -> dict[str, Detection | None]:
 
 
 def _loss_cause(state: WorldState) -> str:
-    """Cause of a lock-loss event, from `state` at the step visibility was lost (SPEC.md).
+    """Cause of a lock-loss event, from the state at the step visibility was lost.
 
-    `WorldState` does not carry raw in-FOV / line-of-sight flags (only their AND with channel
-    physics, via `channels_see`); this reconstructs the cause from what is available:
-    - `person_box is None` -> the target could not be projected into the image at all -> "fov".
-    - Else a dark-immune alive channel (depth/thermal) exists that still does not see -> since
-      those channels ignore illumination, only occlusion explains it -> "occlusion".
-    - Else the only-alive candidate is rgb and illumination is below its threshold -> "darkness".
-    - Else (rgb alive but bright enough, or no channel alive at all) -> "dropout" / "occlusion":
-      no channel alive at all -> "dropout"; rgb alive+bright but still unseen -> "occlusion".
+    Uses the env's explicit geometry flags (review 2026-09-04 F2: inferring "fov" from
+    `person_box is None` labelled every edge-of-frame loss "occlusion").
+    - not in_fov      -> "fov"
+    - occluded        -> "occlusion"
+    - no alive channel -> "dropout"
+    - alive channels exist but none sees: rgb-only alive and too dark -> "darkness", else "dropout"
     """
-    if state.person_box is None:
+    if not state.in_fov:
         return "fov"
-    alive = state.channels_alive
-    # dark immunity == min_illumination 0.0 (core.schemas.ChannelSpec — no separate flag).
-    if any(alive[c] for c in CHANNELS if CHANNEL_SPECS[c].min_illumination == 0.0):
+    if not state.unoccluded:
         return "occlusion"
-    if not any(alive.values()):
+    alive = [c for c, a in state.channels_alive.items() if a]
+    if not alive:
         return "dropout"
-    if alive["rgb"] and state.illumination_at_person < CHANNEL_SPECS["rgb"].min_illumination:
+    dark_immune_alive = [c for c in alive if CHANNEL_SPECS[c].min_illumination == 0.0]
+    if not dark_immune_alive and all(
+        state.illumination_at_person < CHANNEL_SPECS[c].min_illumination for c in alive
+    ):
         return "darkness"
-    return "occlusion"
+    return "dropout"
 
 
 def run_episode(
@@ -126,14 +124,19 @@ def run_episode(
     prey.reset(layout, difficulty, seed)
     obs_builder = ObsBuilder(layout)
     tracker = LockTracker()
-    injector = NoiseInjector(noise if noise is not None else EVAL_NOISE)
+    # per-episode noise seed: one frozen seed for all 20 episodes hid the noise variance that
+    # deviation row 6 measured (review 2026-09-04 F4, row 11). Distribution unchanged.
+    injector = NoiseInjector(noise if noise is not None else NoiseConfig(**{**vars(EVAL_NOISE), "seed": seed}))
     sensor = Sensor(env.model, env.data, env.CAMERA, seed=seed) if capture else None
 
     state = env.state()
     obs = obs_builder.reset(state)
-    stack: deque[npt.NDArray[np.float32]] = deque(
-        [obs.vector() for _ in range(_DEFAULT_FRAME_STACK)], maxlen=_DEFAULT_FRAME_STACK
-    )
+    n_stack = hunter.n_stack if isinstance(hunter, PPOHunter) else 1
+    stack: deque[npt.NDArray[np.float32]] = deque(maxlen=n_stack)
+    # SB3 VecFrameStack semantics: zero-filled history, newest observation last (review F7)
+    for _ in range(n_stack - 1):
+        stack.append(np.zeros_like(obs.vector()))
+    stack.append(obs.vector())
 
     states: list[WorldState] = []
     actions: list[AgentAction] = []
@@ -155,12 +158,13 @@ def run_episode(
             action = hunter.act(obs)
 
         state = env.step(action, (pvx, pvy))
-        obs = obs_builder.step(state)
-        stack.append(obs.vector())
 
         gt = _gt_detections(state)
         detections = injector(gt, t)
         tracks, lock_status = tracker.update(detections, t)
+        # the policy's "time since seen" is its own tracker's lock, not privileged geometry (D15)
+        obs = obs_builder.step(state, seen=lock_status.locked)
+        stack.append(obs.vector())
 
         if sensor is not None and frames is not None:
             # darkness is read here

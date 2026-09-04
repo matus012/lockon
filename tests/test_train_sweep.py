@@ -8,7 +8,6 @@ from pathlib import Path
 import numpy as np
 import pytest
 import yaml
-from stable_baselines3 import PPO
 
 from lockon.core.schemas import AgentObs
 from lockon.harness.sweep import SweepConfig, run_sweep, write_curves, write_failure_report
@@ -77,29 +76,37 @@ def test_train_smoke_writes_best_and_log(train_config: Path, tmp_path: Path) -> 
 # (b) frame-stack ordering matches VecFrameStack --------------------------------------------
 
 
-def test_frame_stack_ordering_matches_vecframestack(train_config: Path, tmp_path: Path) -> None:
-    out_dir = tmp_path / "runs" / "ppo_smoke_fs"
-    train(str(train_config), str(out_dir), wall_hours=0.05, total_steps=4096)
-    best = out_dir / "best.zip"
+def test_frame_stack_ordering_matches_vecframestack() -> None:
+    """SB3's VecFrameStack = zero-filled history, newest last. The harness deque in
+    `run_episode` replicates that; assert it against SB3 on a real env with identical seeds and
+    actions (a same-vector predict comparison could not fail under a reversed stack)."""
+    from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
 
-    model = PPO.load(str(best), device="cpu")
+    from lockon.core import AgentObs, Difficulty
+    from lockon.harness.gym_env import LockonGym
+    from lockon.policy.features import RewardConfig
+    from lockon.policy.prey import ScriptedPrey
 
-    rng = np.random.default_rng(0)
-    obs_size = AgentObs.size()
-    frame_stack = 4
-    frames = [rng.uniform(-1.0, 1.0, size=obs_size).astype(np.float32) for _ in range(frame_stack)]
-    stacked_vector = np.concatenate(frames).astype(np.float64)
+    def make() -> LockonGym:
+        return LockonGym(Difficulty(), seed=0, prey=ScriptedPrey(), reward=RewardConfig())
 
-    hunter = PPOHunter(str(best))
-    hunter.reset(layout=None, seed=0)  # type: ignore[arg-type]
-    hunter_action = hunter.act_vector(stacked_vector)
+    raw_env = DummyVecEnv([make])
+    stk_env = VecFrameStack(DummyVecEnv([make]), 4)
+    raw_env.env_method("reset", seed=77)
+    stk_env.env_method("reset", seed=77)
+    raw = [raw_env.reset()[0]]
+    stacked = [stk_env.reset()[0]]
+    rng = np.random.default_rng(3)
+    for _ in range(6):
+        a = rng.uniform(-1, 1, size=(1, 3)).astype(np.float32)
+        raw.append(raw_env.step(a)[0][0])
+        stacked.append(stk_env.step(a)[0][0])
+    d = AgentObs.size()
+    for k, s in enumerate(stacked):
+        hist = [np.zeros(d, dtype=np.float32)] * max(0, 3 - k) + raw[max(0, k - 3) : k + 1]
+        expected = np.concatenate(hist[-4:])
+        assert np.allclose(s, expected), f"stack mismatch at step {k}"
 
-    model_action, _ = model.predict(stacked_vector.astype(np.float32), deterministic=True)
-
-    np.testing.assert_allclose(hunter_action.as_array(), model_action, rtol=1e-5, atol=1e-6)
-
-
-# (c) sweep smoke ---------------------------------------------------------------------------
 
 
 @pytest.fixture

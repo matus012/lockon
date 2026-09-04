@@ -137,6 +137,15 @@ class PPOHunter:
             "PPOHunter.act requires the harness's frame-stacked vector; use act_vector(vector)"
         )
 
+    @property
+    def n_stack(self) -> int:
+        """Frame-stack depth implied by the loaded model's observation space (never a default)."""
+        model = self._model
+        if model is None:
+            raise RuntimeError("PPOHunter.reset() must load the model first")
+        dim = int(model.observation_space.shape[0])  # type: ignore[attr-defined]
+        return max(1, dim // AgentObs.size())
+
     def act_vector(self, vector: FloatArray) -> AgentAction:
         assert self._model is not None, "PPOHunter.reset() must be called before act_vector()"
         action, _ = self._model.predict(vector, deterministic=True)  # type: ignore[attr-defined]

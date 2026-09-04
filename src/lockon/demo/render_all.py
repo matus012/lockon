@@ -48,7 +48,7 @@ SHOTS: dict[str, ShotSpec] = {
         scene="occlusion",
         start=118,
         steps=60,
-        hero=True,
+        hero=False,  # showcase seed is certified under the scene's ScriptedHunter only (row 7, review F3)
         caption="Person ducks behind a pillar, drone repositions, lock survives.",
     ),
     "lights_cut": ShotSpec(

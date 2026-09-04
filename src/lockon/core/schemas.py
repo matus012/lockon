@@ -109,6 +109,8 @@ class WorldState:
     person_box: FloatArray | None  # projected GT box xyxy or None if outside the image
     raycasts: FloatArray  # (N_RAYCASTS,) distances normalised to [0, 1] by 2*half_size
     illumination_at_person: float  # [0, 1], from the light field
+    in_fov: bool = False  # torso centre projects inside the image (geometry only)
+    unoccluded: bool = False  # line of sight to torso or head is clear (geometry only)
     channels_alive: dict[str, bool] = field(default_factory=lambda: dict.fromkeys(CHANNELS, True))
     channels_see: dict[str, bool] = field(default_factory=lambda: dict.fromkeys(CHANNELS, False))
     # channels_see[c] = alive[c] AND in-FOV AND unoccluded AND channel_sees(c, illum, range).

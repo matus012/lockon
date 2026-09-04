@@ -38,7 +38,9 @@ class ObsBuilder:
 
     @property
     def steps_since_seen(self) -> int:
-        """Consecutive steps without a sighting - the counter `reward()` consumes (single source)."""
+        """Consecutive steps without a sighting as this builder saw it (state or tracker lock,
+        whichever the caller passes to `step`). The training wrapper keeps its own lock-based
+        counter for the reward; both count the same events when `seen=lock.locked` is passed."""
         return self._steps_since_seen
 
     def reset(self, state: WorldState) -> AgentObs:
@@ -48,8 +50,12 @@ class ObsBuilder:
         self._steps_since_seen = 0
         return self._build(state)
 
-    def step(self, state: WorldState) -> AgentObs:
-        if state.person_visible:
+    def step(self, state: WorldState, seen: bool | None = None) -> AgentObs:
+        """`seen` defaults to state visibility; the harness passes the frozen tracker's lock so
+        the policy observes the same quantity the reward pays for (review 2026-09-04 F8, D15)."""
+        if seen is None:
+            seen = state.person_visible
+        if seen:
             self._last_seen_world = np.array([state.person.x, state.person.y], dtype=np.float64)
             self._last_seen_illum = state.illumination_at_person
             self._steps_since_seen = 0

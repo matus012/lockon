@@ -78,11 +78,11 @@ class LockonGym(gym.Env[ObsType, ActType]):
         agent_action = AgentAction.from_array(action)
         pv = self._prey.act(self._env.state(), self._env.illumination)
         state = self._env.step(agent_action, pv)
-        obs = self._obs_builder.step(state)
         self._t += 1
         assert self._tracker is not None and self._noise is not None
         _, lock = self._tracker.update(self._noise(_gt_detections(state), self._t), self._t)
         self._locked = lock.locked
+        obs = self._obs_builder.step(state, seen=lock.locked)  # D15: observe what the reward pays
         self._steps_since_seen = 0 if lock.locked else self._steps_since_seen + 1
         r = reward(state, agent_action, self._steps_since_seen, self._reward_cfg, visible=lock.locked)
         terminated = self._t >= EPISODE_STEPS
