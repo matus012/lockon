@@ -6,25 +6,25 @@ graph, §3 gates) → 4. `project.md` only when a decision is questioned (it is 
 Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doctrines.md`.
 
 ## Position
-- **Step 5 of 12 — PPO run 5 in flight** (2026-09-04, ~8 h in). Gates PASS at HEAD: G0 G1 G2 G3
-  G4 (per-episode noise, seeds 1000–1019: scripted 56.2 % vs static 46.0 %) G8. G5 passed on
-  run 4 (54.5 vs 44.2) BEFORE deviation rows 11–12; it is re-run on run 5's best.zip when the
-  run ends (`check_gates.py G5`), then PPO vs scripted (`eval --policy runs/ppo_local/best.zip
-  --vs scripted --n 20 --seed-base 1000 --json reports/eval_ppo_vs_scripted.json`).
-- Then, in order (all one-command): `sweep --config configs/sweep_local.yaml --workers 6` (G6,
-  ~20 min, memory-bound — never run with the render or training), `demo.render_all --policy
-  scripted` + the three GIF renders (commands in runs/render_final.log), `check_gates.py G6 G7 G8
-  G9`, `scripts/readme_table.py` → paste into README (PPO row + n + CI), C6 pass 2 on the
-  package READMEs (mech), status.txt = NEEDS YOU "approve HPC launch" with
-  reports/hpc_launch_plan.md, session report + strejc-nav.
-- PPO history: runs 1–3 instrument-defective (fixed layouts; visibility reward; std-1
-  exploration); run 4 = fork count 1 (tie with scripted, row 10); run 5 = pre-registered
-  observation change (row 12, D15) — if it does not beat scripted it stays a tie, hero = scripted.
-- Two fresh-context lead reviews done (rows 2–6, 7–12). Known honest properties for the README:
-  ByteTrack coast 16/20 across a 2 s gap; darkness alone never breaks lock (thermal proxy);
-  1-step detection latency handicaps movers; prey LOS-break bias +0.065 conservative
-  (reports/los_break_bias.json); n = 20 local gates are direction-only (CI ±0.17).
-- Ritual (plan §8) every ~2 h: commit → this file + status.txt → compaction.
+- **Step 6 of 12 — STOPPED for owner approval** (2026-09-05, ~12 h autonomous). Steps 1–5 done;
+  G0–G9 PASS at commit 796ae35 (`reports/gates.json`, gitignored — re-run `check_gates.py --all`
+  to regenerate; ~30 min, sweep included). Owner action: one line "approve HPC launch"
+  (`reports/hpc_launch_plan.md`, `HPC_RUNBOOK.md`).
+- Numbers (seeds 1000–1019, per-episode noise, mid difficulty): static 45.9 · scripted 56.2 ·
+  PPO 53.2 % retention. Hero = scripted (plan §6 default; fork counter 2 of 3, rows 10/13).
+  Canonical PPO artifact = `runs/ppo_local/best.zip` (run 4, `best.zip.obs.json` = state obs).
+  Curves `reports/curves/*.png`, `reports/sweep/{results.json,failure_report.md}`; shots
+  `demo/shots/*.mp4` (untracked, regenerate with `python -m lockon.demo.render_all`);
+  GIFs `reports/gifs/` (committed, allow-listed).
+- After approval (step 7): fill partition/account in `configs/hpc_sweep.yaml`, `scripts/hpc/
+  make_hpc_bundle.py build` (wheelhouse step in the runbook), rsync, bootstrap, smoke, array.
+  Step 8 (local ∥ 7): nothing owed — curves, READMEs, viewer done. Step 9: best unit → fork
+  verdict at n ≥ 80 held-out episodes (seeds 1000–1079), renders on a GPU node. Step 10: swap
+  best policy if it beats scripted, README H200 line, status READY.
+- Not implemented (named, not hidden): `lockon.harness.train_prey` (learned-prey GPU trial) —
+  the GPU sbatch is a placeholder; write it only if the owner wants the 20 GPU-h trial.
+- Fourteen dated deviation rows, two opus reviews, 118 tests, pilots in `reports/pilots/`.
+  Session report: `../000_infra/reports/2026-09-05-110-lockon-steps-1-5.md`.
 
 ## Architecture (plan §9 D1, D4)
 ```
