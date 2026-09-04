@@ -25,7 +25,7 @@
 *.webm
 !reports/gifs/*.gif
 !reports/curves/*.png
-!demo/shots/*.mp4
+# demo/shots/*.mp4 stay untracked: reproducible from `python -m lockon.demo.render_all` (G7)
 !demo/assets/*.png
 
 # --- environment / derived ---

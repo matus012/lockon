@@ -1,15 +1,18 @@
-"""SPEC.md `Tests` 1-5 (Phase A). Test 6 (render smoke) is Phase B — not written here."""
+"""SPEC.md `Tests` 1-6."""
 
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
+import pytest
 from gymnasium.utils.env_checker import check_env
 
 from lockon.core.schemas import Difficulty
 from lockon.harness.episode import run_episode
 from lockon.harness.eval import evaluate
 from lockon.harness.gym_env import LockonGym
+from lockon.harness.render import _write_gif, render_frames
 from lockon.harness.scenes import SCENES
 from lockon.policy.features import RewardConfig
 from lockon.policy.hunters import StaticCamera
@@ -93,3 +96,16 @@ def test_evaluate_returns_finite_numbers() -> None:
     scripted_result = evaluate("scripted", Difficulty(), range(3))
     assert math.isfinite(scripted_result["retention_mean"])
     assert math.isfinite(scripted_result["retention_std"])
+
+
+# 6. render smoke -------------------------------------------------------------------------------
+
+
+@pytest.mark.render
+def test_render_smoke_produces_a_gif(tmp_path: Path) -> None:
+    frames = render_frames("sensor3", steps=10)
+    assert len(frames) == 10
+    gif_path = tmp_path / "sensor3_smoke.gif"
+    _write_gif(frames, gif_path, fps=10, scale=1.0)
+    assert gif_path.exists()
+    assert gif_path.stat().st_size > 1024

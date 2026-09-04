@@ -11,6 +11,7 @@ external datasets. Every runtime dependency is listed; pins live in `requirement
 | Stable-Baselines3 | MIT | PPO |
 | PyTorch | BSD-3 | SB3 backend |
 | Roboflow `trackers` | Apache-2.0 | ByteTrack |
+| Roboflow `supervision` (dependency of trackers) | MIT | detections container |
 | PyAV (`av`) | BSD-3 (bundled FFmpeg: LGPL-only build) | mp4 writing |
 | imageio | BSD-2 | GIF writing |
 | Pillow | MIT-CMU (HPND) | image ops |
