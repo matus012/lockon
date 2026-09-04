@@ -1,4 +1,4 @@
-STATUS: 1/12 — IN PROGRESS — plan.md + skeleton written; venv + deps + render probe next
+STATUS: 4/12 — IN PROGRESS — core/env/sensor/track/policy built (G0 G1 G8 PASS @2171ecf); harness episode/eval/scenes building
 RETENTION: static n/a · scripted n/a · ppo n/a (0 episodes)
 HPC: 0/0 · 0/70-100 GPU-h
 NEEDS YOU: none
