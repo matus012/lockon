@@ -35,6 +35,10 @@ logger = logging.getLogger(__name__)
 DT: float = 1.0 / CONTROL_HZ
 DRONE_V_MAX: float = 2.5
 DRONE_YAW_RATE_MAX: float = 1.5
+# first-order command response (kinematic, no flight physics): applied = prev + ALPHA*(cmd - prev).
+# tau = 0.3 s at 10 Hz. Without it a Gaussian exploration policy jitters the camera every step,
+# ByteTrack's image-space Kalman switches ids and PPO never sees a lock reward (2026-09-04, D14).
+DRONE_CMD_ALPHA: float = 1.0 / 3.0
 PERSON_YAW_MIN_SPEED: float = 0.05
 R_DRONE: float = 0.35
 R_PERSON: float = 0.30
@@ -68,6 +72,7 @@ class Env:
         self.model: mujoco.MjModel
         self.data: mujoco.MjData
         self._rng: np.random.Generator
+        self._drone_cmd: FloatArray = np.zeros(3, dtype=np.float64)
         self._dropout_rng: np.random.Generator
         self._t: int = 0
         self._drone_pose = Pose2D(0.0, 0.0, 0.0)
@@ -104,6 +109,7 @@ class Env:
             mujoco.mj_forward(self.model, self.data)
 
         self._t = 0
+        self._drone_cmd = np.zeros(3, dtype=np.float64)
         self._dead_channel = None
         self._dead_until = 0
         self._channel_overrides = {}
@@ -177,8 +183,9 @@ class Env:
 
     # -- step ----------------------------------------------------------------------------------
     def step(self, action: AgentAction, person_velocity: tuple[float, float]) -> WorldState:
-        a = np.clip(action.as_array(), -1.0, 1.0)
-        vx_b, vy_b, yaw_rate_n = float(a[0]), float(a[1]), float(a[2])
+        cmd = np.clip(action.as_array(), -1.0, 1.0)
+        self._drone_cmd = self._drone_cmd + DRONE_CMD_ALPHA * (cmd - self._drone_cmd)
+        vx_b, vy_b, yaw_rate_n = float(self._drone_cmd[0]), float(self._drone_cmd[1]), float(self._drone_cmd[2])
 
         yaw = self._drone_pose.yaw
         c, s = math.cos(yaw), math.sin(yaw)

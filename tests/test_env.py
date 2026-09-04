@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import math
 
 import mujoco
 import numpy as np
@@ -150,3 +151,22 @@ def test_person_max_speed_dial_extremes() -> None:
     assert env_lo.person_max_speed() == pytest.approx(0.6)
     env_hi = Env(Difficulty(prey_speed=1.0), seed=2)
     assert env_hi.person_max_speed() == pytest.approx(2.2)
+
+
+def test_drone_commands_are_low_pass_filtered() -> None:
+    """A full-speed command from rest moves the drone ALPHA of the max in the first step and
+    approaches the max geometrically (env.DRONE_CMD_ALPHA); the filter resets on reset()."""
+    from lockon.env import env as env_mod
+
+    e = Env(Difficulty(), seed=5)
+    st0 = e.reset()
+    st1 = e.step(AgentAction(1.0, 0.0, 0.0), (0.0, 0.0))
+    d1 = math.hypot(st1.drone.x - st0.drone.x, st1.drone.y - st0.drone.y)
+    assert d1 == pytest.approx(env_mod.DRONE_CMD_ALPHA * env_mod.DRONE_V_MAX * env_mod.DT, rel=0.05)
+    for _ in range(30):
+        e.step(AgentAction(1.0, 0.0, 0.0), (0.0, 0.0))
+    # after 30 steps the command has converged (may be wall/pillar clamped, so only check the filter)
+    assert float(e._drone_cmd[0]) == pytest.approx(1.0, abs=1e-3)
+    e.reset()
+    assert float(np.abs(e._drone_cmd).max()) == 0.0
+

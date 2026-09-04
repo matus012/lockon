@@ -38,7 +38,8 @@ class PPOConfig:
     gamma: float = 0.99
     gae_lambda: float = 0.95
     learning_rate: float = 3e-4
-    ent_coef: float = 0.01
+    ent_coef: float = 0.0
+    log_std_init: float = -1.0
     clip_range: float = 0.2
     net_arch: tuple[int, ...] = (128, 128)
     checkpoint_every: int = 100_000
@@ -75,7 +76,7 @@ def make_ppo(env: gym.Env[Any, Any] | VecEnv, seed: int, cfg: PPOConfig) -> PPO:
         gae_lambda=cfg.gae_lambda,
         ent_coef=cfg.ent_coef,
         clip_range=cfg.clip_range,
-        policy_kwargs={"net_arch": list(cfg.net_arch)},
+        policy_kwargs={"net_arch": list(cfg.net_arch), "log_std_init": cfg.log_std_init},
         seed=seed,
         device=DEVICE,
         verbose=0,
