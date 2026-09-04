@@ -32,13 +32,14 @@ class RetentionResult:
     retained: npt.NDArray[np.bool_]  # per-step flag
     n_loss_events: int
     time_to_reacquire: float  # mean steps from loss to reacquisition over reacquired events; nan if none
-    n_censored_losses: int  # losses never reacquired before the episode ended
+    last_loss_censored: bool  # the final loss was never reacquired before the episode ended
 
 
 def retention(
     gt_boxes: Sequence[npt.NDArray[np.float64] | None],
     tracks: Sequence[Sequence[Track]],
     iou_threshold: float = IOU_THRESHOLD,
+    episode_steps: int | None = None,
 ) -> RetentionResult:
     """Steps tracked with the CORRECT id (the target's first assigned id) / episode steps.
 
@@ -49,6 +50,10 @@ def retention(
     """
     if len(gt_boxes) != len(tracks):
         raise ValueError(f"gt_boxes ({len(gt_boxes)}) and tracks ({len(tracks)}) differ in length")
+    if episode_steps is not None and len(gt_boxes) != episode_steps:
+        # one row per env.step, unconditionally - a harness that records only visible steps
+        # would otherwise score ~1.0 (review 2026-09-04 finding 3)
+        raise ValueError(f"{len(gt_boxes)} rows for a {episode_steps}-step episode")
     n = len(gt_boxes)
     retained = np.zeros(n, dtype=np.bool_)
     target_id: int | None = None
@@ -68,7 +73,7 @@ def retention(
 
     losses: list[int] = []
     reacq: list[int] = []
-    censored = 0
+    censored = False
     in_loss_since: int | None = None
     for t in range(n):
         if retained[t]:
@@ -79,12 +84,12 @@ def retention(
             in_loss_since = t
             losses.append(t)
     if in_loss_since is not None:
-        censored = 1
+        censored = True
     return RetentionResult(
         retention=float(retained.mean()) if n else 0.0,
         target_id=target_id,
         retained=retained,
         n_loss_events=len(losses),
         time_to_reacquire=float(np.mean(reacq)) if reacq else float("nan"),
-        n_censored_losses=censored,
+        last_loss_censored=censored,
     )

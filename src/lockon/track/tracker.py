@@ -1,4 +1,12 @@
-"""ByteTrack over fused multi-channel detections (project.md §7: perception frozen during RL).
+"""ByteTrack over fused multi-channel detections.
+
+    `target_id` here = the first track that ever appears (no GT available in this package); the
+    scored id in `core.metrics.retention` = IoU-argmax at the first overlapping step. They coincide
+    because the noise injector never fabricates detections (no false positives), so exactly one
+    track can exist at first sight. LockStatus feeds the RL/lock path only, never a reported number
+    (review 2026-09-04 finding 4).
+
+    Original note: (project.md §7: perception frozen during RL).
 
 Fusion: ByteTrack treats each detection it is fed as an independent object. If several channels
 (rgb/depth/thermal) all report the same physical person at the same step, feeding all of them in

@@ -16,6 +16,8 @@ import numpy.typing as npt
 from lockon.core.schemas import (
     CHANNELS,
     CONTROL_HZ,
+    IMAGE_HEIGHT,
+    IMAGE_WIDTH,
     N_RAYCASTS,
     AgentAction,
     ArenaLayout,
@@ -41,6 +43,7 @@ DROPOUT_BURST_LO: int = 10
 DROPOUT_BURST_HI: int = 40
 RESET_PLACEMENT_TRIES: int = 200
 RESET_DRONE_LOS_TRIES: int = 50
+RESET_PAIR_TRIES = 8
 RESET_DRONE_DIST_LO: float = 6.0
 RESET_DRONE_DIST_HI: float = 10.0
 
@@ -65,6 +68,7 @@ class Env:
         self.model: mujoco.MjModel
         self.data: mujoco.MjData
         self._rng: np.random.Generator
+        self._dropout_rng: np.random.Generator
         self._t: int = 0
         self._drone_pose = Pose2D(0.0, 0.0, 0.0)
         self._person_pose = Pose2D(0.0, 0.0, 0.0)
@@ -83,6 +87,9 @@ class Env:
     def reset(self, seed: int | None = None) -> WorldState:
         if seed is not None:
             self._rng = np.random.default_rng(seed)
+            # dropout gets its own stream so the schedule does not shift with the number of
+            # pillar rejection draws when occluder_density changes (review finding 7)
+            self._dropout_rng = np.random.default_rng([seed, 0x5D5D])
             self.layout = arena.build_layout(self.difficulty, self._rng, self.half_size)
             mjcf = arena.build_mjcf(self.layout)
             self.model = mujoco.MjModel.from_xml_string(mjcf)
@@ -101,8 +108,15 @@ class Env:
         self._dead_until = 0
         self._channel_overrides = {}
 
-        self._person_pose = self._sample_person_pose()
-        self._drone_pose = self._sample_drone_pose(self._person_pose)
+        # episode starts visible (SPEC): re-sample the person if no clear drone pose exists
+        for _attempt in range(RESET_PAIR_TRIES):
+            self._person_pose = self._sample_person_pose()
+            drone = self._sample_drone_pose(self._person_pose)
+            if drone is not None:
+                self._drone_pose = drone
+                break
+        else:
+            raise RuntimeError(f"no visible start after {RESET_PAIR_TRIES} person placements")
         self._write_mocap()
         self.set_darkness(self.difficulty.darkness)
         mujoco.mj_forward(self.model, self.data)
@@ -122,7 +136,7 @@ class Env:
         logger.warning("person placement: exhausted %d tries, using last candidate", RESET_PLACEMENT_TRIES)
         return Pose2D(x, y, float(self._rng.uniform(-math.pi, math.pi)))
 
-    def _sample_drone_pose(self, person: Pose2D) -> Pose2D:
+    def _sample_drone_pose(self, person: Pose2D) -> Pose2D | None:
         bound = self.half_size - WALL_MARGIN - R_DRONE
         last = Pose2D(0.0, 0.0, 0.0)
         for _ in range(RESET_DRONE_LOS_TRIES):
@@ -148,8 +162,8 @@ class Env:
             target = np.array([person.x, person.y, arena.TORSO_CENTER[2]])
             if geometry.line_of_sight(self.model, self.data, eye, target):
                 return candidate
-        logger.warning("drone placement: no clear line of sight found, starting occluded")
-        return last
+        logger.debug("drone placement: no clear line of sight for this person pose; re-sampling")
+        return None
 
     def _write_mocap(self) -> None:
         self.data.mocap_pos[self._drone_mocap_id] = [
@@ -209,9 +223,9 @@ class Env:
         if hazard <= 0.0:
             return
         for c in CHANNELS:
-            if float(self._rng.random()) < hazard:
+            if float(self._dropout_rng.random()) < hazard:
                 self._dead_channel = c
-                duration = int(self._rng.integers(DROPOUT_BURST_LO, DROPOUT_BURST_HI + 1))
+                duration = int(self._dropout_rng.integers(DROPOUT_BURST_LO, DROPOUT_BURST_HI + 1))
                 self._dead_until = self._t + duration
                 break
 
@@ -222,7 +236,7 @@ class Env:
         fovy = float(self.model.cam_fovy[self._cam_id])
 
         px, py, pyaw = self._person_pose.x, self._person_pose.y, self._person_pose.yaw
-        box = geometry.person_box(cam_pos, cam_mat, fovy, 640, 480, px, py, pyaw)
+        box = geometry.person_box(cam_pos, cam_mat, fovy, IMAGE_WIDTH, IMAGE_HEIGHT, px, py, pyaw)
 
         torso_world = np.array(
             [
@@ -239,9 +253,9 @@ class Env:
             ]
         )
         pixels, depth = geometry.project_points(
-            torso_world.reshape(1, 3), cam_pos, cam_mat, fovy, 640, 480
+            torso_world.reshape(1, 3), cam_pos, cam_mat, fovy, IMAGE_WIDTH, IMAGE_HEIGHT
         )
-        in_fov = bool(depth[0] > 0.0 and 0.0 <= pixels[0, 0] <= 640.0 and 0.0 <= pixels[0, 1] <= 480.0)
+        in_fov = bool(depth[0] > 0.0 and 0.0 <= pixels[0, 0] <= IMAGE_WIDTH and 0.0 <= pixels[0, 1] <= IMAGE_HEIGHT)
         torso_clear = geometry.line_of_sight(self.model, self.data, cam_pos, torso_world)
         head_clear = geometry.line_of_sight(self.model, self.data, cam_pos, head_world)
         unoccluded = torso_clear or head_clear
@@ -308,7 +322,7 @@ class Env:
         cam_pos = np.array(self.data.cam_xpos[self._cam_id], dtype=np.float64)
         cam_mat = np.array(self.data.cam_xmat[self._cam_id], dtype=np.float64)
         fovy = float(self.model.cam_fovy[self._cam_id])
-        return geometry.project_points(points_world, cam_pos, cam_mat, fovy, 640, 480)
+        return geometry.project_points(points_world, cam_pos, cam_mat, fovy, IMAGE_WIDTH, IMAGE_HEIGHT)
 
     def person_max_speed(self) -> float:
         return person_max_speed(self.difficulty)

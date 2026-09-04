@@ -19,6 +19,7 @@ import numpy.typing as npt
 FloatArray = npt.NDArray[np.float64]
 
 CHANNELS: Final[tuple[str, ...]] = ("rgb", "depth", "thermal")
+PERSON_MATERIAL: Final[str] = "person_mat"  # MJCF material on every person geom (env writes, sensor swaps)
 
 
 @dataclass(frozen=True)
@@ -31,13 +32,13 @@ class ChannelSpec:
 
     min_illumination: float  # channel sees only if illumination at the target >= this
     max_range_m: float  # channel sees only if camera-target range <= this
-    dark_immune: bool  # True: unaffected by lights-cut (depth, thermal)
+    # dark immunity == min_illumination 0.0; no second flag (review 2026-09-04 finding 10)
 
 
 CHANNEL_SPECS: Final[dict[str, ChannelSpec]] = {
-    "rgb": ChannelSpec(min_illumination=0.15, max_range_m=60.0, dark_immune=False),
-    "depth": ChannelSpec(min_illumination=0.0, max_range_m=20.0, dark_immune=True),
-    "thermal": ChannelSpec(min_illumination=0.0, max_range_m=60.0, dark_immune=True),
+    "rgb": ChannelSpec(min_illumination=0.15, max_range_m=60.0),
+    "depth": ChannelSpec(min_illumination=0.0, max_range_m=20.0),
+    "thermal": ChannelSpec(min_illumination=0.0, max_range_m=60.0),
 }
 assert tuple(CHANNEL_SPECS) == CHANNELS
 

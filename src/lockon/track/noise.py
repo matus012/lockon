@@ -14,11 +14,14 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from lockon.core.schemas import Detection
+from lockon.core.schemas import IMAGE_HEIGHT, Detection
 
 logger = logging.getLogger(__name__)
 
-_SMALL_BOX_PX = 24.0  # below this box height, treat as (partially) occluded
+# 'occlusion_dropout' is an extra miss probability for SMALL boxes (target far / mostly hidden):
+# box height below a quarter of the image (120 px at 480) - at 6 m standoff boxes are ~110 px,
+# so the term is live across the working range (review 2026-09-04 finding 2: 24 px never fired).
+_SMALL_BOX_FRACTION = 0.25
 
 
 @dataclass(frozen=True)
@@ -60,7 +63,7 @@ class NoiseInjector:
         for channel, det in gt.items():
             if det is None:
                 continue
-            small = (det.box[3] - det.box[1]) < _SMALL_BOX_PX
+            small = (det.box[3] - det.box[1]) < _SMALL_BOX_FRACTION * IMAGE_HEIGHT
             drop_p = cfg.miss_rate + (cfg.occlusion_dropout if small else 0.0)
             if self._rng.random() < drop_p:
                 continue

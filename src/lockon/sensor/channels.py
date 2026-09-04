@@ -9,12 +9,14 @@ import mujoco  # type: ignore[import-untyped]
 import numpy as np
 import numpy.typing as npt
 
+from lockon.core.schemas import PERSON_MATERIAL
 from lockon.sensor.registry import RenderContext, register
 
 logger = logging.getLogger(__name__)
 
 _MAX_DEPTH_M = 20.0
-_PERSON_MAT_NAME = "person_mat"
+_PERSON_MAT_NAME = PERSON_MATERIAL
+_THERMAL_GLOW_THRESHOLD = 64  # emissive person renders ~255; an empty frame must stay dark (review finding 14)
 _THERMAL_BACKGROUND = 40.0
 _THERMAL_PERSON = 255.0
 
@@ -63,7 +65,7 @@ def render_thermal(ctx: RenderContext) -> npt.NDArray[np.uint8]:
         rgb = ctx.renderer.render().astype(np.float64)
         gray = rgb.mean(axis=-1)
 
-        glow_mask = gray >= (gray.max() * 0.5 if gray.max() > 0 else 1.0)
+        glow_mask = gray >= _THERMAL_GLOW_THRESHOLD
         toned = np.where(
             glow_mask,
             _THERMAL_PERSON,

@@ -16,6 +16,7 @@ from lockon.env.env import Env
 pytestmark = pytest.mark.render
 
 IOU_MIN = 0.7
+IOU_STATE_MIN = 0.5
 N_STATES = 20
 
 
@@ -65,6 +66,11 @@ def test_segmentation_bbox_matches_projected_box() -> None:
         speed = float(rng.uniform(0.0, max_speed))
         st = env.step(action, (speed * np.cos(heading), speed * np.sin(heading)))
         if st.person_box is None:
+            # converse: no GT box => (almost) no person pixels rendered
+            rendered_none = _render_person_bbox(renderer, env.model, env.data, env.CAMERA, person_ids)
+            assert rendered_none is None or (
+                (rendered_none[2] - rendered_none[0]) * (rendered_none[3] - rendered_none[1]) < 64
+            ), f"person_box is None but person pixels rendered: {rendered_none}"
             continue
 
         rendered = _render_person_bbox(renderer, env.model, env.data, env.CAMERA, person_ids)
@@ -74,3 +80,7 @@ def test_segmentation_bbox_matches_projected_box() -> None:
     assert len(ious) == N_STATES, f"only found {len(ious)}/{N_STATES} in-frame states in {tries} steps"
     mean_iou = float(np.mean(ious))
     assert mean_iou >= IOU_MIN, f"mean IoU {mean_iou:.3f} < {IOU_MIN}; per-state: {ious}"
+    # per-state floor (deviation-log row 2): the projection is an unoccluded-geometry AABB, so a
+    # single sample can sit near 0.65 under perspective; a real transform bug drops a sample
+    # far below 0.5. Both assertions together are the instrument proof.
+    assert min(ious) >= IOU_STATE_MIN, f"per-state IoU {min(ious):.3f} < {IOU_STATE_MIN}; {ious}"

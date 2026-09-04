@@ -11,7 +11,7 @@ output = `Track`s + `LockStatus`. project.md §2: the tracker consumes GT boxes 
 class NoiseConfig:
     miss_rate: float = 0.1          # P(drop a detection) per channel per step
     jitter_px: float = 4.0          # gaussian sigma on each box edge, pixels
-    occlusion_dropout: float = 0.0  # extra P(drop) when the box is small (< 24 px tall) — partial occlusion proxy
+    occlusion_dropout: float = 0.0  # extra P(drop) when the box is small (< 25 % of image height) — far / mostly-hidden target proxy
     latency_steps: int = 0          # detections are delivered latency_steps late (FIFO)
     score_mean: float = 0.85; score_std: float = 0.1   # confidence noise, clipped to [0.05, 1]
     seed: int = 0

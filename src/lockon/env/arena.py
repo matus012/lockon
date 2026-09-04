@@ -8,7 +8,7 @@ import math
 
 import numpy as np
 
-from lockon.core.schemas import ArenaLayout, Difficulty
+from lockon.core.schemas import IMAGE_HEIGHT, IMAGE_WIDTH, PERSON_MATERIAL, ArenaLayout, Difficulty
 
 WALL_MARGIN_M: float = 1.5
 CENTER_CLEARANCE_M: float = 2.5
@@ -145,7 +145,7 @@ def build_mjcf(layout: ArenaLayout) -> str:
     parts.append('<mujoco model="lockon_arena">')
     parts.append("  <option gravity=\"0 0 0\"/>")
     parts.append("  <visual>")
-    parts.append('    <global offwidth="640" offheight="480"/>')
+    parts.append(f'    <global offwidth="{IMAGE_WIDTH}" offheight="{IMAGE_HEIGHT}"/>')
     parts.append('    <headlight active="0" ambient="0 0 0" diffuse="0 0 0" specular="0 0 0"/>')
     parts.append("  </visual>")
     parts.append("  <asset>")
@@ -158,7 +158,7 @@ def build_mjcf(layout: ArenaLayout) -> str:
     )
     parts.append('    <material name="pillar_mat" rgba="0.45 0.35 0.28 1"/>')
     parts.append('    <material name="wall_mat" rgba="0.5 0.5 0.55 1"/>')
-    parts.append('    <material name="person_mat" rgba="1 1 1 1"/>')
+    parts.append(f'    <material name="{PERSON_MATERIAL}" rgba="1 1 1 1"/>')
     parts.append("  </asset>")
     parts.append("  <worldbody>")
     parts.append(
@@ -206,25 +206,25 @@ def build_mjcf(layout: ArenaLayout) -> str:
     t0, t1 = TORSO_CENTER[2] - TORSO_HALF_LEN, TORSO_CENTER[2] + TORSO_HALF_LEN
     parts.append(
         f'      <geom name="person_torso" type="capsule" fromto="0 0 {t0} 0 0 {t1}" '
-        f'size="{TORSO_RADIUS}" material="person_mat" rgba="0.8 0.2 0.2 1" group="3" '
+        f'size="{TORSO_RADIUS}" material="{PERSON_MATERIAL}" rgba="0.8 0.2 0.2 1" group="3" '
         'contype="0" conaffinity="0"/>'
     )
     parts.append(
         f'      <geom name="person_head" type="sphere" pos="0 0 {HEAD_CENTER[2]}" '
-        f'size="{HEAD_RADIUS}" material="person_mat" rgba="0.9 0.75 0.6 1" group="3" '
+        f'size="{HEAD_RADIUS}" material="{PERSON_MATERIAL}" rgba="0.9 0.75 0.6 1" group="3" '
         'contype="0" conaffinity="0"/>'
     )
     for side, xoff in (("l", -LEG_X_OFFSET), ("r", LEG_X_OFFSET)):
         parts.append(
             f'      <geom name="person_leg_{side}" type="capsule" '
             f'fromto="{xoff} 0 {LEG_Z_LO} {xoff} 0 {LEG_Z_HI}" size="{LEG_RADIUS}" '
-            'material="person_mat" rgba="0.2 0.2 0.6 1" group="3" contype="0" conaffinity="0"/>'
+            f'material="{PERSON_MATERIAL}" rgba="0.2 0.2 0.6 1" group="3" contype="0" conaffinity="0"/>'
         )
     for side, yoff in (("l", ARM_Y_OFFSET), ("r", -ARM_Y_OFFSET)):
         parts.append(
             f'      <geom name="person_arm_{side}" type="capsule" '
             f'fromto="0 {yoff} {ARM_Z_LO} 0 {yoff} {ARM_Z_HI}" size="{ARM_RADIUS}" '
-            'material="person_mat" rgba="0.9 0.75 0.6 1" group="3" contype="0" conaffinity="0"/>'
+            f'material="{PERSON_MATERIAL}" rgba="0.9 0.75 0.6 1" group="3" contype="0" conaffinity="0"/>'
         )
     parts.append("    </body>")
 

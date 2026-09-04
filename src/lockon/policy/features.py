@@ -36,6 +36,11 @@ class ObsBuilder:
         self._last_seen_illum = 0.0
         self._steps_since_seen = 0
 
+    @property
+    def steps_since_seen(self) -> int:
+        """Consecutive steps without a sighting - the counter `reward()` consumes (single source)."""
+        return self._steps_since_seen
+
     def reset(self, state: WorldState) -> AgentObs:
         # Episode starts visible: last_seen = current (SPEC.md).
         self._last_seen_world = np.array([state.person.x, state.person.y], dtype=np.float64)

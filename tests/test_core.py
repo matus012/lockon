@@ -31,7 +31,7 @@ def test_retention_id_switch_is_a_loss_even_if_box_matches() -> None:
     tracks = [[Track(1, _box(0), t)] for t in range(3)] + [[Track(2, _box(0), t)] for t in range(3, 6)]
     r = retention(gt, tracks)
     assert r.target_id == 1 and r.retention == pytest.approx(0.5)
-    assert r.n_loss_events == 1 and r.n_censored_losses == 1
+    assert r.n_loss_events == 1 and r.last_loss_censored
 
 
 def test_retention_reacquire_time() -> None:
@@ -51,6 +51,8 @@ def test_retention_gt_none_counts_as_not_retained() -> None:
 def test_retention_length_mismatch_raises() -> None:
     with pytest.raises(ValueError):
         retention([_box(0)], [])
+    with pytest.raises(ValueError):
+        retention([_box(0)], [[]], episode_steps=2)
 
 
 def test_difficulty_bounds_and_replace() -> None:
