@@ -39,7 +39,7 @@ class PPOConfig:
     gae_lambda: float = 0.95
     learning_rate: float = 3e-4
     ent_coef: float = 0.0
-    log_std_init: float = -1.0
+    log_std_init: float = -1.6
     clip_range: float = 0.2
     net_arch: tuple[int, ...] = (128, 128)
     checkpoint_every: int = 100_000
