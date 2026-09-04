@@ -1,0 +1,17 @@
+{
+  "los_break_on": {
+    "scripted_mean": 0.56175,
+    "static_mean": 0.45949999999999996,
+    "gap_mean": 0.10225,
+    "gap_se": 0.06497415984349794,
+    "n": 20
+  },
+  "los_break_off": {
+    "scripted_mean": 0.6285000000000001,
+    "static_mean": 0.46075,
+    "gap_mean": 0.16774999999999998,
+    "gap_se": 0.06510464754208371,
+    "n": 20
+  },
+  "bias_off_minus_on": 0.06549999999999999
+}
