@@ -36,6 +36,12 @@ _XML = """
 """
 
 
+def _all_groups() -> mujoco.MjvOption:
+    opt = mujoco.MjvOption()
+    opt.geomgroup[:] = 1
+    return opt
+
+
 def _make_state(t: int = 0, box: np.ndarray | None = None, **overrides: object) -> WorldState:
     defaults: dict[str, object] = {
         "t": t,
@@ -83,6 +89,7 @@ def test_each_renderer_returns_uint8_image(
         state=state,
         darkness=0.0,
         rng=np.random.default_rng(0),
+        scene_option=_all_groups(),
     )
     for c in CHANNELS:
         img = RENDERERS[c](ctx)
@@ -96,9 +103,14 @@ def test_rgb_dims_with_darkness_thermal_depth_stable(
     model, data = model_data
     state = _make_state()
     light_diffuse_full = model.light_diffuse.copy()
+    headlight_ambient_full = model.vis.headlight.ambient.copy()
+    headlight_diffuse_full = model.vis.headlight.diffuse.copy()
 
     def render_all(darkness: float) -> dict[str, np.ndarray]:
         model.light_diffuse[:] = light_diffuse_full * (1.0 - darkness)
+        # env also scales the camera headlight fill with darkness (Env.set_darkness)
+        model.vis.headlight.ambient[:] = headlight_ambient_full * (1.0 - darkness)
+        model.vis.headlight.diffuse[:] = headlight_diffuse_full * (1.0 - darkness)
         mujoco.mj_forward(model, data)
         ctx = RenderContext(
             model=model,
@@ -108,12 +120,15 @@ def test_rgb_dims_with_darkness_thermal_depth_stable(
             state=state,
             darkness=darkness,
             rng=np.random.default_rng(0),
+            scene_option=_all_groups(),
         )
         return {c: RENDERERS[c](ctx) for c in CHANNELS}
 
     bright = render_all(0.0)
     dark = render_all(1.0)
     model.light_diffuse[:] = light_diffuse_full
+    model.vis.headlight.ambient[:] = headlight_ambient_full
+    model.vis.headlight.diffuse[:] = headlight_diffuse_full
     mujoco.mj_forward(model, data)
 
     rgb_bright_mean = bright["rgb"].astype(np.float64).mean()
@@ -144,6 +159,7 @@ def test_thermal_pass_restores_model(
         state=state,
         darkness=0.0,
         rng=np.random.default_rng(0),
+        scene_option=_all_groups(),
     )
     RENDERERS["thermal"](ctx)
 

@@ -20,7 +20,7 @@ PY = [sys.executable]
 GATES: dict[str, list[list[str]]] = {
     "G0": [PY + ["-m", "mypy", "--strict", "src/lockon/core"], PY + ["-m", "pytest", "-q", "tests/test_boundaries.py", "tests/test_core.py"]],
     "G1": [PY + ["-m", "lockon.harness.bench_env", "--steps", "2000", "--min-sps", "200"]],
-    "G2": [PY + ["-m", "lockon.harness.render", "--scene", "sensor3", "--gif", "reports/gifs/sensor_3ch.gif"], PY + ["-m", "pytest", "-q", "tests/test_sensor.py"]],
+    "G2": [PY + ["-m", "lockon.harness.render", "--scene", "sensor3", "--gif", "reports/gifs/sensor_3ch.gif", "--steps", "30", "--scale", "0.4", "--fps", "6"], PY + ["-m", "pytest", "-q", "tests/test_sensor.py"]],
     "G3": [PY + ["-m", "pytest", "-q", "tests/test_track.py"], PY + ["-c", "import pathlib,sys; sys.exit(0 if all(pathlib.Path(p).exists() for p in ['reports/gifs/occlusion_lock.gif','reports/gifs/lights_cut_lock.gif']) else 1)"]],
     "G4": [PY + ["-m", "lockon.harness.eval", "--policy", "scripted", "--vs", "static", "--n", "20"]],
     "G5": [PY + ["-m", "lockon.harness.eval", "--policy", "runs/ppo_local/best.zip", "--vs", "static", "--n", "20"]],

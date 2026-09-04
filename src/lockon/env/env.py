@@ -308,6 +308,9 @@ class Env:
             base = float(self.layout.lights[i, 2])
             v = base * (1.0 - self._darkness)
             self.model.light_diffuse[i] = [v, v, v]
+        fill = 1.0 - self._darkness
+        self.model.vis.headlight.ambient[:] = arena.HEADLIGHT_AMBIENT * fill
+        self.model.vis.headlight.diffuse[:] = arena.HEADLIGHT_DIFFUSE * fill
 
     def set_channels_alive(self, alive: Mapping[str, bool]) -> None:
         self._channel_overrides.update(alive)

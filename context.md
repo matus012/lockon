@@ -59,6 +59,9 @@ harness imports anything; demo imports harness + core; core imports numpy only.
   + one sensor renderer (gate G2 wording "touches only sensor" read as sensor + registry line).
 - D11 2026-09-04: eval-time perception frozen at `NoiseConfig.from_dial(0.3)` + LockTracker
   defaults (harness constant `EVAL_NOISE`); every owner-facing retention number uses it.
+- D13 2026-09-04: reward = tracker lock held, not state visibility (deviation row 8); the frozen
+  tracker runs inside LockonGym at state speed with the eval noise dial and a per-episode seed.
+  Also fixed: LockonGym re-samples layout + prey seed every episode (SB3 resets with seed=None).
 - D12 2026-09-04: arena half-size 12 m, drone altitude 3 m, pillars 3.5 m tall (LOS is
   horizontal geometry: the drone must go around, not over); 10 Hz, 200-step episodes.
 

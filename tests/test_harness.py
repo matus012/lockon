@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 from pathlib import Path
 
+import numpy as np
 import pytest
 from gymnasium.utils.env_checker import check_env
 
@@ -106,6 +107,25 @@ def test_render_smoke_produces_a_gif(tmp_path: Path) -> None:
     frames = render_frames("sensor3", steps=10)
     assert len(frames) == 10
     gif_path = tmp_path / "sensor3_smoke.gif"
-    _write_gif(frames, gif_path, fps=10, scale=1.0)
+    _write_gif(frames, gif_path, fps=10)
     assert gif_path.exists()
     assert gif_path.stat().st_size > 1024
+
+
+def test_gym_resamples_layout_every_episode() -> None:
+    """SB3 resets with seed=None after the first episode: layouts and prey must still change."""
+    from lockon.core import Difficulty
+    from lockon.harness.gym_env import LockonGym
+    from lockon.policy.features import RewardConfig
+    from lockon.policy.prey import ScriptedPrey
+
+    env = LockonGym(Difficulty(), seed=3, prey=ScriptedPrey(), reward=RewardConfig())
+    env.reset(seed=3)
+    first = env._env.layout.pillars.copy()
+    env.reset()
+    second = env._env.layout.pillars.copy()
+    env.reset()
+    third = env._env.layout.pillars.copy()
+    assert first.shape != second.shape or not np.allclose(first, second)
+    assert second.shape != third.shape or not np.allclose(second, third)
+

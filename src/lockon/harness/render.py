@@ -22,7 +22,7 @@ import numpy as np
 import numpy.typing as npt
 from PIL import Image, ImageDraw, ImageFont
 
-from lockon.core.schemas import CHANNELS, ArenaLayout, LockStatus, Track, WorldState
+from lockon.core.schemas import CHANNELS, ArenaLayout, LockStatus, SensorFrame, Track, WorldState
 from lockon.env.env import Env
 from lockon.harness.episode import EpisodeResult, resolve_hunter, run_episode
 from lockon.harness.scenes import SCENES, SceneSpec
@@ -120,17 +120,31 @@ def _banner_text(state: WorldState, lock: LockStatus, retention_so_far: float) -
     return f"t={state.t} | lock: {lock_txt} | retention so far {retention_so_far * 100.0:.0f} %"
 
 
+def _panel_legend(frame: SensorFrame) -> str:
+    dead = [c for c, alive in frame.alive.items() if not alive]
+    return "channels: " + " | ".join(frame.alive) + (f"   dead: {', '.join(dead)}" if dead else "")
+
+
 def _compose_frame(
     result: EpisodeResult,
     layout: ArenaLayout,
     i: int,
     font: ImageFont.ImageFont | ImageFont.FreeTypeFont,
+    scale: float = 1.0,
 ) -> npt.NDArray[np.uint8]:
-    """One rendered step: side-by-side channels + track boxes on top, banner + minimap strip below."""
+    """One rendered step: side-by-side channels + track boxes on top, banner + minimap strip below.
+
+    `scale` shrinks the channel panels only; banner text and minimap stay full size so a 0.35x
+    GIF is still legible (visual review 2026-09-04).
+    """
     assert result.frames is not None
     frame = result.frames[i]
     top = side_by_side(frame, labels=True)
     _draw_tracks(top, frame.width, result.tracks[i])
+    if scale != 1.0:
+        img_top = Image.fromarray(top)
+        new_size = (max(1, int(img_top.width * scale)), max(1, int(img_top.height * scale)))
+        top = np.asarray(img_top.resize(new_size, Image.Resampling.LANCZOS), dtype=np.uint8)
 
     strip_h = MINIMAP_SIZE
     strip_w = top.shape[1]
@@ -146,8 +160,9 @@ def _compose_frame(
 
     img = Image.fromarray(canvas)
     draw = ImageDraw.Draw(img)
-    text_y = top.shape[0] + strip_h // 2 - 8
+    text_y = top.shape[0] + strip_h // 2 - 10
     draw.text((12, text_y), text, fill=BANNER_TEXT_COLOR, font=font)
+    draw.text((12, text_y - 24), _panel_legend(frame), fill=BANNER_TEXT_COLOR, font=font)
     return np.asarray(img, dtype=np.uint8)
 
 
@@ -158,6 +173,7 @@ def render_frames(
     fps: int = 10,
     steps: int | None = None,
     start: int | None = None,
+    scale: float = 1.0,
 ) -> list[npt.NDArray[np.uint8]]:
     """Run `scene_name` (SCENES registry) with capture=True and compose every rendered step.
 
@@ -178,18 +194,11 @@ def render_frames(
     window_len = steps if (start is not None and steps is not None) else run_steps - window_start
     window_end = min(run_steps, window_start + window_len)
 
-    font = ImageFont.load_default()
-    return [_compose_frame(result, layout, i, font) for i in range(window_start, window_end)]
+    font = ImageFont.load_default(size=16)
+    return [_compose_frame(result, layout, i, font, scale) for i in range(window_start, window_end)]
 
 
-def _write_gif(frames: list[npt.NDArray[np.uint8]], path: Path, fps: int, scale: float) -> None:
-    if scale != 1.0:
-        out = []
-        for f in frames:
-            img = Image.fromarray(f)
-            new_size = (max(1, int(img.width * scale)), max(1, int(img.height * scale)))
-            out.append(np.asarray(img.resize(new_size, Image.Resampling.LANCZOS), dtype=np.uint8))
-        frames = out
+def _write_gif(frames: list[npt.NDArray[np.uint8]], path: Path, fps: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     iio.imwrite(path, frames, extension=".gif", duration=1000.0 / fps, loop=0)
     logger.info("wrote GIF %s (%d frames, %.1f fps)", path, len(frames), fps)
@@ -234,9 +243,9 @@ def main(argv: list[str] | None = None) -> None:
     logging.basicConfig(level=logging.INFO)
     args = _parse_args(argv)
     frames = render_frames(
-        args.scene, policy=args.policy, fps=args.fps, steps=args.steps, start=args.start
+        args.scene, policy=args.policy, fps=args.fps, steps=args.steps, start=args.start, scale=args.scale
     )
-    _write_gif(frames, args.gif, args.fps, args.scale)
+    _write_gif(frames, args.gif, args.fps)
     if args.mp4 is not None:
         _write_mp4(frames, args.mp4, args.fps)
 

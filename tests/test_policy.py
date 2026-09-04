@@ -7,6 +7,7 @@ import math
 import gymnasium as gym
 import numpy as np
 import numpy.typing as npt
+import pytest
 from gymnasium import spaces
 
 from lockon.core import person_max_speed
@@ -263,3 +264,15 @@ def test_ppo_config_from_yaml_tolerates_extra_keys() -> None:
     assert "curriculum" in cfg.extra
     assert "reward" in cfg.extra
     assert cfg.extra["wall_hours"] == 5
+
+
+def test_reward_visible_override_uses_tracker_lock() -> None:
+    from lockon.policy.features import RewardConfig, reward
+
+    drone = Pose2D(0.0, 0.0, 0.0)
+    person = Pose2D(5.0, 0.0, 0.0)
+    state = _state(drone, person, person_visible=True)
+    cfg = RewardConfig()
+    assert reward(state, AgentAction.zero(), 0, cfg) == pytest.approx(1.0)
+    assert reward(state, AgentAction.zero(), 0, cfg, visible=False) == pytest.approx(0.0)
+

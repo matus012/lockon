@@ -37,14 +37,17 @@ logger = logging.getLogger(__name__)
 _CKPT_RE = re.compile(r"^ckpt_(\d+)\.zip$")
 
 
-def _difficulty_at(dial: float) -> Difficulty:
-    return Difficulty(
+def _difficulty_at(dial: float, overrides: dict[str, float] | None = None) -> Difficulty:
+    """All five dials at `dial`, then per-axis `overrides` (config key `difficulty:`), so an HPC
+    arena unit can pin occluder_density while the curriculum still ramps the other axes."""
+    d = Difficulty(
         occluder_density=dial,
         darkness=dial,
         prey_speed=dial,
         prey_aggressiveness=dial,
         channel_dropout=dial,
     )
+    return d.replace(**overrides) if overrides else d
 
 
 def _reward_config(cfg: PPOConfig) -> RewardConfig:
@@ -53,16 +56,16 @@ def _reward_config(cfg: PPOConfig) -> RewardConfig:
     return RewardConfig(**{k: v for k, v in raw.items() if k in known})
 
 
-def _make_env_fn(seed: int, dial: float, reward_cfg: RewardConfig) -> Any:
+def _make_env_fn(seed: int, dial: float, reward_cfg: RewardConfig, overrides: dict[str, float] | None = None) -> Any:
     def _init() -> LockonGym:
-        return LockonGym(_difficulty_at(dial), seed=seed, prey=ScriptedPrey(), reward=reward_cfg)
+        return LockonGym(_difficulty_at(dial, overrides), seed=seed, prey=ScriptedPrey(), reward=reward_cfg)
 
     return _init
 
 
-def build_vec_env(cfg: PPOConfig, seed: int, start_dial: float) -> VecFrameStack:
+def build_vec_env(cfg: PPOConfig, seed: int, start_dial: float, overrides: dict[str, float] | None = None) -> VecFrameStack:
     reward_cfg = _reward_config(cfg)
-    fns = [_make_env_fn(seed + i, start_dial, reward_cfg) for i in range(cfg.n_envs)]
+    fns = [_make_env_fn(seed + i, start_dial, reward_cfg, overrides) for i in range(cfg.n_envs)]
     subproc = SubprocVecEnv(fns, start_method="spawn")
     monitored = VecMonitor(subproc)
     return VecFrameStack(monitored, n_stack=cfg.frame_stack)
@@ -106,7 +109,8 @@ class CurriculumCallback(BaseCallback):
     total_steps` (SPEC.md; applied via `VecEnv.env_method`, takes effect at the next reset).
     """
 
-    def __init__(self, switch_step: int, end_dial: float, verbose: int = 0) -> None:
+    def __init__(self, switch_step: int, end_dial: float, verbose: int = 0, overrides: dict[str, float] | None = None) -> None:
+        self._overrides = overrides
         super().__init__(verbose)
         self._switch_step = switch_step
         self._end_dial = end_dial
@@ -114,7 +118,7 @@ class CurriculumCallback(BaseCallback):
 
     def _on_step(self) -> bool:
         if not self._switched and self.model.num_timesteps >= self._switch_step:
-            self.training_env.env_method("set_difficulty", _difficulty_at(self._end_dial))
+            self.training_env.env_method("set_difficulty", _difficulty_at(self._end_dial, self._overrides))
             logger.info(
                 "curriculum switch at step %d: dial -> %.2f", self.model.num_timesteps, self._end_dial
             )
@@ -234,9 +238,12 @@ def train(
     curriculum = cfg.extra.get("curriculum", {})
     start_dial = float(curriculum.get("start_dial", 0.3))
     end_dial = float(curriculum.get("end_dial", 0.5))
+    overrides = {k: float(v) for k, v in dict(cfg.extra.get("difficulty", {}) or {}).items()}
+    if overrides:
+        logger.info("difficulty overrides: %s", overrides)
     switch_fraction = float(curriculum.get("switch_fraction", 0.4))
 
-    env = build_vec_env(cfg, cfg.seed, start_dial)
+    env = build_vec_env(cfg, cfg.seed, start_dial, overrides)
 
     if resume:
         from stable_baselines3 import PPO
@@ -256,7 +263,7 @@ def train(
         ThroughputLogCallback(),
         CheckpointCallback(out_dir, cfg.checkpoint_every),
         WallClockStopCallback(wall),
-        CurriculumCallback(int(switch_fraction * total), end_dial),
+        CurriculumCallback(int(switch_fraction * total), end_dial, overrides=overrides),
         RetentionEvalCallback(out_dir, cfg.eval_every, eval_episodes),
     ]
 

@@ -104,6 +104,12 @@ class Sensor:
         self.width = width
         self.height = height
         self.renderer = mujoco.Renderer(model, height=height, width=width)
+        # MuJoCo renders geom groups 0-2 by default; the person figure is group 3 (env arena) and
+        # was invisible in every channel until 2026-09-04. Group 2 (drone body) stays hidden so the
+        # camera never sees its own airframe.
+        self._scene_option = mujoco.MjvOption()
+        self._scene_option.geomgroup[:] = 1
+        self._scene_option.geomgroup[2] = 0
         self.rng = np.random.default_rng(seed)
         logger.info(
             "Sensor initialised: camera=%s size=%dx%d channels=%s seed=%d",
@@ -119,6 +125,7 @@ class Sensor:
             state=state,
             darkness=darkness,
             rng=self.rng,
+            scene_option=self._scene_option,
         )
         images: dict[str, npt.NDArray[np.uint8] | None] = {}
         gt: dict[str, Detection | None] = {}

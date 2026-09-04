@@ -1,0 +1,52 @@
+# Direct dependencies of the PERUN CPU sweep (state-PPO units, plan.md §7), for LINUX
+# resolution. This is the *input* to requirements-hpc.txt (the offline cluster lock):
+#
+#   uv pip compile requirements-hpc.in \
+#       --python-platform x86_64-manylinux_2_28 --python-version 3.11 \
+#       --extra-index-url https://download.pytorch.org/whl/cpu \
+#       --index-strategy unsafe-best-match -o requirements-hpc.txt
+#
+# (scripts/hpc/make_hpc_bundle.py build --refresh-lock runs exactly that command.)
+#
+# Then, to populate the wheelhouse the bundle ships (NOT run automatically -- torch
+# alone is ~200 MB even on the CPU index; see HPC_RUNBOOK.md):
+#
+#   uv run pip download -r requirements-hpc.txt -d data/wheelhouse --only-binary=:all: \
+#       --platform manylinux_2_28_x86_64 --python-version 3.11 --implementation cp \
+#       --abi cp311 --extra-index-url https://download.pytorch.org/whl/cpu
+#
+# CPU-ONLY TORCH (plan.md §8: "state-PPO trains on CPU by design"; SB3 MlpPolicy is
+# CPU-optimal). The pytorch CPU-index wheel is far smaller than the cu126 build this
+# repo's dev-box requirements.txt pins, and the 45-unit CPU array never touches CUDA.
+#
+# GPU units (learned-prey trial, render pass -- plan.md §7, scripts/hpc/sweep_launcher
+# ::render_gpu_sbatch) need MuJoCo's EGL/OSMesa offscreen backend and a CUDA torch;
+# they are OUT OF SCOPE for this lock. Once `lockon.harness.train_prey` exists
+# (harness/SPEC.md places it after step 7), build a second wheelhouse from a copy of
+# this file with `--extra-index-url .../whl/cu126` and `mujoco` unchanged (EGL is a
+# runtime env var, MUJOCO_GL, not a separate wheel) -- see HPC_RUNBOOK.md "GPU units".
+#
+# gradio is dev-box/demo-only (the local viewer, project.md §2 "no live render in the
+# viewer" is unrelated but the point stands: nothing on the cluster imports
+# lockon.demo) -- excluded here to keep the wheelhouse to what the sweep actually runs.
+#
+# Versions pinned to this repo's dev-box requirements.txt wherever the package exists
+# for both platforms, so cluster results stay comparable to local ones.
+
+torch==2.14.0
+numpy==2.4.6
+mujoco==3.12.0
+gymnasium==1.3.0
+stable-baselines3==2.9.0
+trackers==2.6.0
+av==18.1.0
+imageio==2.37.4
+pillow==12.3.0
+pyyaml==6.0.3
+matplotlib==3.11.1
+# opencv-python-headless, not opencv-python: compute nodes routinely lack
+# libGL.so.1, which the non-headless wheel dlopen()s at `import cv2` (trackers pulls
+# opencv-python transitively -- resolve it deterministically, not by install order).
+opencv-python-headless==5.0.0.93
+
+pytest==9.1.1

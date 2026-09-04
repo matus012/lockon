@@ -13,8 +13,10 @@ import numpy.typing as npt
 
 from lockon.core.schemas import EPISODE_STEPS, AgentAction, AgentObs, Difficulty
 from lockon.env.env import Env
+from lockon.harness.episode import EVAL_NOISE, _gt_detections
 from lockon.policy.base import Prey
 from lockon.policy.features import ObsBuilder, RewardConfig, reward
+from lockon.track import LockTracker, NoiseConfig, NoiseInjector
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,9 @@ class LockonGym(gym.Env[ObsType, ActType]):
         super().__init__()
         self.difficulty = difficulty
         self._seed = seed
+        self._locked: bool = False
+        self._noise: NoiseInjector | None = None
+        self._tracker: LockTracker | None = None
         self._prey = prey
         self._reward_cfg = reward
         self._env = Env(difficulty, seed)
@@ -49,11 +54,19 @@ class LockonGym(gym.Env[ObsType, ActType]):
     ) -> tuple[ObsType, dict[str, Any]]:
         super().reset(seed=seed)
         self._env.difficulty = self.difficulty
-        # `Env(difficulty, seed)` already reset deterministically in __init__; an explicit `seed`
-        # here rebuilds the layout for a new episode, `None` continues the env's own rng stream
-        # (gymnasium allows `reset(seed=None)`; SB3/VecEnv reseed explicitly at episode starts).
-        state = self._env.reset(seed)
-        self._prey.reset(self._env.layout, self.difficulty, seed if seed is not None else self._seed)
+        # Every episode gets a fresh layout + prey seed. SB3 only seeds once per worker and then
+        # calls reset(seed=None); Env.reset(None) keeps the SAME pillar layout and the prey was
+        # reseeded with a constant, so the first PPO run trained on 8 fixed arenas with a
+        # deterministic prey and fell below the static floor on fresh seeds (2026-09-04).
+        episode_seed = seed if seed is not None else int(self.np_random.integers(0, 2**31 - 1))
+        state = self._env.reset(episode_seed)
+        self._prey.reset(self._env.layout, self.difficulty, episode_seed)
+        # frozen perception in the loop (D13): same noise dial as eval, per-episode noise seed
+        self._noise = NoiseInjector(NoiseConfig(**{**vars(EVAL_NOISE), "seed": episode_seed}))
+        self._tracker = LockTracker()
+        self._tracker.reset()
+        _, lock = self._tracker.update(self._noise(_gt_detections(state), 0), 0)
+        self._locked = lock.locked
         self._obs_builder = ObsBuilder(self._env.layout)
         obs = self._obs_builder.reset(state)
         self._steps_since_seen = 0
@@ -66,13 +79,17 @@ class LockonGym(gym.Env[ObsType, ActType]):
         pv = self._prey.act(self._env.state(), self._env.illumination)
         state = self._env.step(agent_action, pv)
         obs = self._obs_builder.step(state)
-        self._steps_since_seen = 0 if state.person_visible else self._steps_since_seen + 1
-        r = reward(state, agent_action, self._steps_since_seen, self._reward_cfg)
         self._t += 1
+        assert self._tracker is not None and self._noise is not None
+        _, lock = self._tracker.update(self._noise(_gt_detections(state), self._t), self._t)
+        self._locked = lock.locked
+        self._steps_since_seen = 0 if lock.locked else self._steps_since_seen + 1
+        r = reward(state, agent_action, self._steps_since_seen, self._reward_cfg, visible=lock.locked)
         terminated = self._t >= EPISODE_STEPS
         truncated = False
         info: dict[str, Any] = {
             "visible": state.person_visible,
+            "locked": lock.locked,
             "steps_since_seen": self._steps_since_seen,
         }
         return obs.vector(), r, terminated, truncated, info

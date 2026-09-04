@@ -33,7 +33,6 @@ ALLOWED_TRACKED_VISUALS: dict[str, str] = {
     "reports/gifs/sensor_3ch.gif": "sim-render",
     "reports/gifs/occlusion_lock.gif": "sim-render",
     "reports/gifs/lights_cut_lock.gif": "sim-render",
-    "reports/gifs/chase.gif": "sim-render",
 }
 
 

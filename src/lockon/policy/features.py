@@ -89,12 +89,23 @@ class RewardConfig:
 
 
 def reward(
-    state: WorldState, action: AgentAction, steps_since_seen: int, cfg: RewardConfig
+    state: WorldState,
+    action: AgentAction,
+    steps_since_seen: int,
+    cfg: RewardConfig,
+    visible: bool | None = None,
 ) -> float:
     """+visible if visible, minus an L2 action penalty, minus `lost_penalty` exactly once the
     step `steps_since_seen == lost_after` fires (project.md §3: "big on lock lost > K steps").
+
+    `visible` defaults to state visibility; the training wrapper passes the frozen tracker's
+    lock instead (context.md D13): a policy rewarded on raw visibility learned to strafe/yaw so
+    hard that the person's image box jumped ~8 px/step and ByteTrack switched ids 5.6x per
+    episode — reward up, retention down. Lock held IS the headline metric, so it is the reward.
     """
-    r = cfg.visible if state.person_visible else 0.0
+    if visible is None:
+        visible = state.person_visible
+    r = cfg.visible if visible else 0.0
     a = action.as_array()
     r -= cfg.action_l2 * float(np.dot(a, a))
     if steps_since_seen == cfg.lost_after:

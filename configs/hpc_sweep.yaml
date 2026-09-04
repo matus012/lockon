@@ -1,0 +1,51 @@
+# PERUN CPU sweep grid (plan.md §7 step 7). 45 units = 5 seeds x 3 reward variants x
+# 3 arena occluder densities. Each unit trains lockon.harness.train on a per-unit YAML
+# derived from configs/ppo_local.yaml (scripts/hpc/sweep_common.py::generate_unit_config).
+name: hpc_sweep_v1
+
+seeds: [0, 1, 2, 3, 4]
+
+reward_variants:
+  base: {}
+  lam_hi: {action_l2: 0.03}
+  k_short: {lost_after: 10}
+
+# ASSUMPTION (see scripts/hpc/sweep_common.py module docstring): pins
+# curriculum.start_dial == end_dial == density -- train.py's config has no
+# independent occluder_density knob.
+arena_densities: [0.3, 0.5, 0.7]
+
+# CPU-h budget input (plan.md §5 step 5): "assume 2 h/unit until measured". Re-measure
+# from the smoke job's wall time and update this value before submitting the array --
+# it is an input to scripts/hpc/sweep_common.py::budget_table, never a threshold that
+# moves to make a gate pass.
+est_h_per_unit: 2.0
+
+total_steps: 6_000_000
+smoke_total_steps: 20_000
+time_smoke: "00:30:00"
+
+# GPU-h budget (plan.md §7): learned-prey trial (<=20 GPU-h hard cap) + curves/three
+# shots render pass on one GPU node, EGL (<=2 GPU-h).
+gpu_h:
+  learned_prey: 20
+  renders: 2
+
+slurm:
+  partition: "<FILL-PERUN-PARTITION>"
+  account: "<FILL-PERUN-ACCOUNT>"
+  cpus_per_task: 8
+  mem: "16G"
+  max_concurrent: 8
+  # GPU-h allocation cap (plan.md §7: "70-100 cap") -- NOT a combined CPU+GPU wall
+  # budget. PERUN's CPU array has no hour ceiling of its own; only the GPU-h grant is
+  # metered. See scripts/hpc/sweep_common.py::budget_table.
+  budget_ceiling_h: 70
+
+gpu_slurm:
+  partition: "<FILL-PERUN-PARTITION>"
+  account: "<FILL-PERUN-ACCOUNT>"
+  gres: "gpu:1"
+  cpus_per_task: 8
+  mem: "32G"
+  time_limit_h: 20

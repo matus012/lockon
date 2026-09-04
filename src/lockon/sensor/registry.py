@@ -29,6 +29,7 @@ class RenderContext:
     state: WorldState
     darkness: float
     rng: np.random.Generator
+    scene_option: mujoco.MjvOption
 
 
 RENDERERS: dict[str, ChannelRenderer] = {}

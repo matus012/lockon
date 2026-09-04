@@ -23,12 +23,15 @@ _THERMAL_PERSON = 255.0
 
 @register("rgb")
 def render_rgb(ctx: RenderContext) -> npt.NDArray[np.uint8]:
-    """Normal scene render with darkness gain and additive gaussian noise (SPEC.md)."""
-    ctx.renderer.update_scene(ctx.data, camera=ctx.camera)
+    """Normal scene render plus additive sensor noise that grows with darkness.
+
+    Scene brightness is the env's job (`Env.set_darkness` scales the lights and the headlight
+    fill); applying a gain here as well double-dimmed the image (visual review 2026-09-04).
+    """
+    ctx.renderer.update_scene(ctx.data, camera=ctx.camera, scene_option=ctx.scene_option)
     rgb = ctx.renderer.render().astype(np.float64)
-    gain = 1.0 - ctx.darkness
     sigma = 4.0 + 40.0 * ctx.darkness
-    noisy = rgb * gain + ctx.rng.normal(0.0, sigma, size=rgb.shape)
+    noisy = rgb + ctx.rng.normal(0.0, sigma, size=rgb.shape)
     return cast(npt.NDArray[np.uint8], np.clip(noisy, 0, 255).astype(np.uint8))
 
 
@@ -37,7 +40,7 @@ def render_depth(ctx: RenderContext) -> npt.NDArray[np.uint8]:
     """Metric depth render mapped to uint8, near = bright (SPEC.md). Unaffected by darkness."""
     ctx.renderer.enable_depth_rendering()
     try:
-        ctx.renderer.update_scene(ctx.data, camera=ctx.camera)
+        ctx.renderer.update_scene(ctx.data, camera=ctx.camera, scene_option=ctx.scene_option)
         depth_m = ctx.renderer.render()
         scaled = 255.0 * (1.0 - np.clip(depth_m / _MAX_DEPTH_M, 0.0, 1.0))
         return cast(npt.NDArray[np.uint8], scaled.astype(np.uint8))
@@ -56,12 +59,20 @@ def render_thermal(ctx: RenderContext) -> npt.NDArray[np.uint8]:
     light_active = model.light_active.copy()
     mat_emission = model.mat_emission.copy()
     mat_rgba = model.mat_rgba.copy()
+    geom_rgba = model.geom_rgba.copy()
+    head_ambient = model.vis.headlight.ambient.copy()
+    head_diffuse = model.vis.headlight.diffuse.copy()
+    person_geoms = np.flatnonzero(model.geom_matid == mat_id)
     try:
         model.light_active[:] = 0
+        model.vis.headlight.ambient[:] = 0.0
+        model.vis.headlight.diffuse[:] = 0.0
         model.mat_emission[mat_id] = 1.0
         model.mat_rgba[mat_id] = (1.0, 1.0, 1.0, 1.0)
+        # per-geom rgba overrides the material colour, so whiten the geoms themselves
+        model.geom_rgba[person_geoms] = (1.0, 1.0, 1.0, 1.0)
 
-        ctx.renderer.update_scene(ctx.data, camera=ctx.camera)
+        ctx.renderer.update_scene(ctx.data, camera=ctx.camera, scene_option=ctx.scene_option)
         rgb = ctx.renderer.render().astype(np.float64)
         gray = rgb.mean(axis=-1)
 
@@ -76,3 +87,6 @@ def render_thermal(ctx: RenderContext) -> npt.NDArray[np.uint8]:
         model.light_active[:] = light_active
         model.mat_emission[:] = mat_emission
         model.mat_rgba[:] = mat_rgba
+        model.geom_rgba[:] = geom_rgba
+        model.vis.headlight.ambient[:] = head_ambient
+        model.vis.headlight.diffuse[:] = head_diffuse

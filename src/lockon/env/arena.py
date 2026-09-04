@@ -11,6 +11,10 @@ import numpy as np
 from lockon.core.schemas import IMAGE_HEIGHT, IMAGE_WIDTH, PERSON_MATERIAL, ArenaLayout, Difficulty
 
 WALL_MARGIN_M: float = 1.5
+# camera-attached fill light so the rgb channel reads as a normal camera at darkness 0;
+# Env.set_darkness scales it with (1 - darkness) exactly like the point lights
+HEADLIGHT_AMBIENT: float = 0.35
+HEADLIGHT_DIFFUSE: float = 0.25
 CENTER_CLEARANCE_M: float = 2.5
 PILLAR_HEIGHT_M: float = 3.5
 N_LIGHTS: int = 6
@@ -146,7 +150,10 @@ def build_mjcf(layout: ArenaLayout) -> str:
     parts.append("  <option gravity=\"0 0 0\"/>")
     parts.append("  <visual>")
     parts.append(f'    <global offwidth="{IMAGE_WIDTH}" offheight="{IMAGE_HEIGHT}"/>')
-    parts.append('    <headlight active="0" ambient="0 0 0" diffuse="0 0 0" specular="0 0 0"/>')
+    parts.append(
+        f'    <headlight active="1" ambient="{HEADLIGHT_AMBIENT} {HEADLIGHT_AMBIENT} {HEADLIGHT_AMBIENT}" '
+        f'diffuse="{HEADLIGHT_DIFFUSE} {HEADLIGHT_DIFFUSE} {HEADLIGHT_DIFFUSE}" specular="0 0 0"/>'
+    )
     parts.append("  </visual>")
     parts.append("  <asset>")
     parts.append(
