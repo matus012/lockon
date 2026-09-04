@@ -1,5 +1,5 @@
-STATUS: 5/12 — IN PROGRESS — G0-G4 G8 PASS; GIFs 1-2 + shots rendered; PPO run 3 started (lock reward, D13) after two diagnosed defects
-RETENTION: static 37.5% · scripted 55.4% · ppo n/a (20 episodes, mid difficulty, noise dial 0.3)
+STATUS: 5/12 — IN PROGRESS — G0-G4 G8 PASS; PPO run 4 training (lock reward, filtered drone): 45.9/44.3/45.5% vs static 37.5% at 0.2/0.4/0.6M steps
+RETENTION: static 37.5% · scripted 56.6% · ppo 45.5% (20 episodes, mid difficulty, noise dial 0.3; ppo = interim eval)
 HPC: 0/0 · 0/70-100 GPU-h (bundle + 45-unit CPU array emitted, not submitted)
 NEEDS YOU: none
 ppo_vs_scripted: 0 of 3
