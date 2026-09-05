@@ -46,6 +46,28 @@ all 1,500 sweep episodes every lock loss is attributed to occlusion or field-of-
 darkness or channel dropout: with a dark-immune thermal proxy and at most one dead channel at a
 time, those two axes cannot break lock on their own (a design statement, now also a measurement).
 
+## What a 45-unit sweep bought (PERUN, cpu_short)
+
+Five seeds × three reward variants × three arena densities, 6M steps each, ~74 CPU-h and no GPU.
+Every unit was scored on its own 20 selection episodes, and the best one was then judged on the
+same held-out seeds as everything else (`reports/hpc/array_results.md`):
+
+| | selection seeds (n=20) | held out (n=80) |
+|---|---|---|
+| best unit `k_short_d0.3_s3` | 55.5 % | **49.4 %** |
+| scripted hunter | 54.3 % | 52.0 % |
+| static camera | 37.6 % | 44.0 % |
+
+**The sweep did not beat the hand-written policy.** Ten of the 45 units "beat" the scripted hunter
+on their own selection seeds by half a point; none of that survived. The best unit gave up 6.1
+points moving to held-out seeds and finished below both the scripted hunter and the single local
+policy — which is what picking the maximum of 45 noisy 20-episode scores does.
+
+The ablation is flat: all nine reward-variant × density cells land between 50.3 % and 52.5 %
+(±1.4–3.7). Neither the action penalty, nor the lost-lock horizon, nor arena clutter moves
+retention. When a swept axis does not move the number, the axis is not the binding constraint —
+so more sweeping was not the answer, and the sweep is reported as the null it is.
+
 ## An evader trained to break the lock (PERUN, one H200)
 
 A second PPO agent was trained as the **prey** — privileged observations, rewarded for being
@@ -130,7 +152,10 @@ unaffected by light level.
   of view (row 9). Letting the policy observe the tracker's lock instead of geometry (row 12)
   made it worse on held-out seeds (row 13). Three local PPO designs; one passes the floor, none
   beats the scripted hunter.
-- **The learned policy never beat the script, and degrades faster under pressure.** Under the
+- **The learned policy never beat the script — across five local runs and a 45-unit cluster
+  sweep.** The fork this project pre-registered ("PPO never beats the scripted hunter after three
+  attempts") fired at 3 of 3, and its written default stands: the scripted hunter is the hero and
+  the PPO result is reported as it is. It also degrades faster under pressure. Under the
   learned evader the PPO hunter gives up 14.2 points more than the scripted one (paired CI
   [+5.1, +23.9]) — though see the three caveats on that trial above. Five local training runs (three of them
   instrument-defective and diagnosed as such) and a 45-unit HPC sweep over seeds, reward
