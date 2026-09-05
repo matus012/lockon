@@ -7,7 +7,7 @@ Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doc
 
 ## Position
 - **Step 7 of 12 — HPC running** (2026-09-05, owner approved the launch).
-- PERUN facts (all verified this session): SSH `login02.perun.tuke.sk` (user mafike202, key in
+- PERUN facts (all verified this session): SSH `login02.perun.tuke.sk` (user in ~/.ssh/config, key in
   ~/.ssh); repo `/mnt/project/perun26011488/lockon/repo` (runs/ stay there — data gravity);
   venvs `.venv` (CPU torch) + `.venv_gpu` (cu126) built ONLINE on the login node
   (`scripts/hpc/hpc_bootstrap_online.sh`, row 15); partitions cpu_short / gpu_short (row 16);
