@@ -63,6 +63,10 @@ on their own selection seeds by half a point; none of that survived. The best un
 points moving to held-out seeds and finished below both the scripted hunter and the single local
 policy — which is what picking the maximum of 45 noisy 20-episode scores does.
 
+Across the full degradation envelope the picture is the same: the scripted hunter sits at or above
+the sweep's best policy at nearly every point on every axis
+(`reports/curves/hpc_best_summary.png`, verdict data in `reports/evals/step9_*.json`).
+
 The ablation is flat: all nine reward-variant × density cells land between 50.3 % and 52.5 %
 (±1.4–3.7). Neither the action penalty, nor the lost-lock horizon, nor arena clutter moves
 retention. When a swept axis does not move the number, the axis is not the binding constraint —

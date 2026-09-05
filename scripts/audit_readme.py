@@ -80,6 +80,12 @@ def main() -> int:
     chk("sweep best on selection seeds", best["retention"]["policy"] * 100, 55.5)
     chk("sweep scripted on selection seeds", best["retention"]["scripted"] * 100, 54.3)
     chk("sweep static on selection seeds", best["retention"]["static"] * 100, 37.6)
+    s9 = _arms("reports/evals/step9_hpcbest_vs_scripted.json")
+    s9zip = [k for k in s9 if k.endswith(".zip")][0]
+    chk("sweep best held out", s9[s9zip].mean() * 100, 49.4)
+    chk("sweep scripted held out", s9["scripted"].mean() * 100, 52.0)
+    chk("sweep static held out", s9["static"].mean() * 100, 44.0)
+
     means = [c["mean"] * 100 for c in arr["ablation"]]
     chk("ablation min", min(means), 50.3)
     chk("ablation max", max(means), 52.5)

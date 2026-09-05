@@ -47,6 +47,7 @@ ALLOWED_TRACKED_VISUALS: dict[str, str] = {
     "reports/curves/prey_speed.png": "plot",
     "reports/curves/prey_aggressiveness.png": "plot",
     "reports/curves/channel_dropout.png": "plot",
+    "reports/curves/hpc_best_summary.png": "plot",
 }
 
 
