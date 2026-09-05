@@ -11,12 +11,17 @@ PY311="${PY311:-/usr/bin/python3.11}"
 [ -x "${PY311}" ] || { echo "ERROR: ${PY311} missing" >&2; exit 1; }
 command -v uv >/dev/null || { echo "ERROR: uv not on PATH" >&2; exit 1; }
 export UV_CACHE_DIR="${UV_CACHE_DIR:-${REPO_ROOT}/.cache/uv}"
+mkdir -p "${REPO_ROOT}/.cache"
 
-make_venv() {  # $1 = venv dir, $2 = torch index url
-  local venv="$1" idx="$2"
+make_venv() {  # $1 = venv dir, $2 = torch index url, $3 = tag (cpu|gpu)
+  local venv="$1" idx="$2" tag="${3:-cpu}"
+  local req="${REPO_ROOT}/.cache/requirements-${tag}.txt"
+  # the lock pins torch==X+cpu (and may carry CRLF); the GPU venv needs the same X from cu126
+  sed -E 's/^(torch==[0-9.]+)\+cpu\r?$/\1/' requirements-hpc.txt | tr -d '\r' > "${req}"
+  grep -n '^torch==' "${req}"
   [ -x "${venv}/bin/python" ] || uv venv --python "${PY311}" "${venv}"
   uv pip install --python "${venv}/bin/python" --index-strategy unsafe-best-match \
-    --extra-index-url "${idx}" -r requirements-hpc.txt
+    --extra-index-url "${idx}" -r "${req}"
   uv pip install --python "${venv}/bin/python" --no-deps -e .
   "${venv}/bin/python" - <<'PYEOF'
 import mujoco, stable_baselines3, trackers, torch, lockon
@@ -27,10 +32,10 @@ PYEOF
 
 if [ "${WHICH}" = "cpu" ] || [ "${WHICH}" = "both" ]; then
   echo "=== CPU venv (.venv) ==="
-  make_venv "${REPO_ROOT}/.venv" "https://download.pytorch.org/whl/cpu"
+  make_venv "${REPO_ROOT}/.venv" "https://download.pytorch.org/whl/cpu" cpu
 fi
 if [ "${WHICH}" = "gpu" ] || [ "${WHICH}" = "both" ]; then
   echo "=== GPU venv (.venv_gpu, cu126) ==="
-  make_venv "${REPO_ROOT}/.venv_gpu" "https://download.pytorch.org/whl/cu126"
+  make_venv "${REPO_ROOT}/.venv_gpu" "https://download.pytorch.org/whl/cu126" gpu
 fi
 echo "BOOTSTRAP OK"

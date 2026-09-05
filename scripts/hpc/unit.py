@@ -120,10 +120,14 @@ def main() -> int:
     ap.add_argument("--total-steps", type=int, default=None,
                      help="override total_steps (smoke jobs use a small value)")
     ap.add_argument("--wall-hours", type=float, default=None)
+    ap.add_argument("--results-root", type=Path, default=None,
+                    help="where <unit>/result.json lives (default runs/hpc); the smoke job uses "
+                         "runs/hpc_smoke so it can never shadow an array unit (2026-09-05)")
     args = ap.parse_args()
 
     sweep_cfg = load_config(args.config)
-    run_unit(sweep_cfg, args.unit, args.config, args.total_steps, args.wall_hours)
+    run_unit(sweep_cfg, args.unit, args.config, args.total_steps, args.wall_hours,
+             results_root=args.results_root if args.results_root is not None else RESULTS_ROOT)
     return 0
 
 

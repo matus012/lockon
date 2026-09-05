@@ -159,7 +159,7 @@ def render_smoke_sbatch(cfg: dict[str, Any], config_path: Path) -> str:
 {_PREAMBLE}
 echo "=== smoke: unit={smoke_unit} total_steps={smoke_steps} ==="
 "$PYTHON" scripts/hpc/unit.py --config {config_posix} --unit {smoke_unit} \\
-  --total-steps {smoke_steps}
+  --total-steps {smoke_steps} --results-root runs/hpc_smoke
 echo "SMOKE OK -- safe to submit runs/hpc/submit.sbatch"
 """
 
