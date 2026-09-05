@@ -1,5 +1,5 @@
-STATUS: 6/12 — PASS (steps 1-5 done, G0-G9 PASS @796ae35) — NEEDS YOU: approve HPC launch
-RETENTION: static 45.9% · scripted 56.2% · ppo 53.2% (20 episodes, mid difficulty, noise dial 0.3, held-out seeds 1000-1019; paired CI ±0.13-0.17 -> direction-only)
-HPC: 0/0 · 0/70-100 GPU-h — plan: reports/hpc_launch_plan.md (45-unit CPU array ≈45 CPU-h, 0 GPU-h; learned-prey trial ≤20 GPU-h; renders ≤2 GPU-h; total ask ≤22 GPU-h)
-NEEDS YOU: "approve HPC launch" (one line; add partition/account names if you have them) — then HPC_RUNBOOK.md steps 1-8 run unattended
-ppo_vs_scripted: 2 of 3 (run 4 tie 53.2 vs 56.2; run 5 rejected; attempt 3 = the HPC array, judged at n>=80 held-out episodes)
+STATUS: 7/12 — IN PROGRESS — HPC launch approved 2026-09-05; bundle + online venv + smoke/array submission running (scripts/hpc/launch_cpu_array.sh); learned-prey entrypoint being built for the ≤20 GPU-h trial
+RETENTION: static 45.9% · scripted 56.2% · ppo 53.2% (20 episodes, mid difficulty, noise dial 0.3, held-out seeds 1000-1019)
+HPC: submitting · 0/70 GPU-h spent (plan ≤22: prey ≤19 + renders ≤2; CPU array 45 units on cpu_short, 0 GPU-h)
+NEEDS YOU: none
+ppo_vs_scripted: 2 of 3 (attempt 3 = the HPC array, judged at n>=80 held-out episodes at step 9)
