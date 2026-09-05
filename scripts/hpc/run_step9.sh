@@ -10,15 +10,26 @@ count() { q "find ${R}/runs/hpc -maxdepth 2 -name result.json -not -path '*/_smo
 queued() { q "squeue -h -u \$USER -o %i | wc -l" | tail -1 | tr -dc '0-9'; }
 
 echo "=== 0 array completeness"
+# The array is resume-safe (a task whose result.json exists exits immediately), so a stall is
+# handled by one resubmission; if that does not move the count, step 9 proceeds on what landed
+# and aggregate.py reports "<n> of 45" honestly (2026-09-05).
+stall=0; last=-1; resubmits=0
 while true; do
   n=$(count); qd=$(queued)
-  if [ "${n:-0}" -ge 45 ]; then break; fi
-  if ! q "test -f ${R}/runs/hpc/base_d0.3_s0/result.json" >/dev/null && ! q "squeue -h -u \$USER -o %i | grep -q '_0\$'" >/dev/null && [ "${qd:-9}" -le 3 ]; then
-    echo "resubmitting array index 0: $(q "cd ${R} && sbatch --parsable --array=0 runs/hpc/submit.sbatch" | tail -1)"
+  arr=$(q "squeue -h -u \$USER -o %j | grep -c lockon_sweep" | tail -1 | tr -dc '0-9')
+  [ "${n:-0}" -ge 45 ] && break
+  if [ "${n:-0}" -eq "$last" ]; then stall=$((stall+1)); else stall=0; last=${n:-0}; fi
+  if [ "${arr:-0}" -eq 0 ]; then
+    if [ "$resubmits" -lt 1 ] && [ "${qd:-9}" -le 3 ]; then
+      echo "array idle at $n/45 -- resubmitting (resume-safe): $(q "cd ${R} && sbatch --parsable runs/hpc/submit.sbatch" | tail -1)"
+      resubmits=$((resubmits+1)); stall=0
+    elif [ "$resubmits" -ge 1 ] && [ "$stall" -ge 3 ]; then
+      echo "array idle and not progressing at $n/45 -- proceeding with what landed"; break
+    fi
   fi
-  echo "$(date +%H:%M) results=$n/45 queued=$qd"; sleep 600
+  echo "$(date +%H:%M) results=$n/45 queued=$qd array_jobs=$arr stall=$stall"; sleep 600
 done
-echo "45/45 results"
+echo "array phase done: $(count)/45 results"
 
 echo "=== 1 pull result JSONs + configs"
 mkdir -p runs/hpc
