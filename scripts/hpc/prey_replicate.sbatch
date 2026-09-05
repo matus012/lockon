@@ -8,7 +8,9 @@
 #SBATCH --mem=48G
 #SBATCH --output=runs/hpc/logs/%x_%j.out
 #SBATCH --error=runs/hpc/logs/%x_%j.err
-# Replication of the learned-prey trial at a second/third training seed (deviation row 19).
+# Learned-prey trial at further training seeds, with the CORRECTED objective (row 20: the prey
+# is paid for breaking the tracker lock, not for geometric invisibility). Attempt 1 (seed 0,
+# visibility reward) is reported separately and is not replaced by these runs.
 # The headline claim — "the scripted hunter is the only policy the learned evader cannot
 # degrade" — rested on one prey training run; this tests whether it replicates.
 # Requires SEED=<n> (sbatch --export=ALL,SEED=1). Measured cost of seed 0: ~2.3 GPU-h.

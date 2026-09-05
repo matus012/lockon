@@ -24,8 +24,17 @@ Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doc
   submits `step9.sbatch` with BEST=<unit> for the n=80 fork verdict + curves + shots on a GPU
   node, pulls the small artifacts back). Step 10 = swap the hero if the best unit beats
   scripted, README H200 line, status READY.
-- Local n=80 verdict on the held-out seeds running in parallel (`reports/eval_n80_*.json`) to
-  replace the n=20 README numbers.
+- Local n=80 verdict done (`reports/eval_n80_ppo_vs_scripted.json`): static 44.0 · scripted 52.0 ·
+  ppo 51.3; both beat static with CIs excluding zero, scripted−ppo +0.7 [−5.1,+6.5].
+- Prey trial attempt 1 (seed 0, visibility reward) done and REPORTED WITH CAVEATS after an
+  adversarial review (rows 19–21): the evader plateaued after 2M of 20M steps, its checkpoint is
+  a −1.9σ draw from that plateau, it never beat the hand-written prey against its own training
+  opponent, and its mechanism is leaving the frame, not hiding. The valid statistic is the paired
+  interaction (scripted gives up 14.2 pp less than PPO, CI [+5.1,+23.9]), not per-arm CI overlap.
+- **Reward corrected (row 20): the prey now pays on tracker lock.** Seeds 1–2 (driver
+  `scripts/hpc/run_prey_replication.sh`, waits for the array then yields to step 9) run the
+  corrected objective and must be reported as a separate attempt, never merged with attempt 1.
+- Repo is PUBLIC at github.com/matus012/lockon (main pushed; internal planning docs are in it).
 
 ## Architecture (plan §9 D1, D4)
 ```
