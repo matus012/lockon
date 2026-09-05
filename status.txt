@@ -1,6 +1,7 @@
-STATUS: 7/12 — IN PROGRESS — public repo live (github.com/matus012/lockon @615bfd1); CPU array 82268 at 17/45 (healthy, ETA ~4 h); prey attempt 1 done + corrected-objective seeds queued behind step 9
-RETENTION (n=80, held-out seeds 1000-1079, mid difficulty): static 44.0% · scripted 52.0% · ppo 51.3% — both beat static (CIs exclude zero); scripted - ppo = +0.7 [-5.1,+6.5] = indistinguishable
-PREY TRIAL attempt 1 (visibility reward, reported with caveats after adversarial review): the valid statistic is the paired interaction — the scripted hunter gives up 14.2 pp less than the PPO hunter under the same evader, CI [+5.1,+23.9]. The evader plateaued after 2M of 20M steps and never beat the hand-written prey against its own training opponent; its mechanism is leaving the frame, not hiding. Reward corrected (row 20) for seeds 1-2.
-HPC: array 17/45 (~50 CPU-h projected) · 2.4/70 GPU-h spent · step-9 renders <=2 and 2 corrected prey seeds <=5 to come
+STATUS: 9/12 — FORK FIRED, DEFAULT STANDS — the 45-unit PERUN array did not beat the scripted hunter; hero = scripted, PPO reported honestly (plan §6 default, no owner action needed per §8)
+RETENTION (n=80, held-out seeds 1000-1079, mid difficulty): static 44.0% · scripted 52.0% · local PPO 51.3% · HPC best 49.4% (selected at 55.5% on its own 20 seeds -> regressed 6.1 pts held out)
+ARRAY: 45/45 units, ~74 CPU-h. All 45 beat static; 10 "beat" scripted on selection seeds and none survived held-out. Ablation flat: all nine reward x density cells land 50.3-52.5%.
+PREY: attempt 1 reported with caveats (rows 19-21); corrected-objective seed 1 running on an H200, seed 2 queued.
+HPC: 2.4/70 GPU-h spent; step-9 job running (curves + shots, <=2 GPU-h) and prey seeds (<=5)
 NEEDS YOU: none
-ppo_vs_scripted: 2 of 3 (attempt 3 = the HPC array; if its best does not beat scripted the plan §6 fork fires and the default stands: scripted = hero, PPO reported honestly)
+ppo_vs_scripted: 3 of 3 (fork resolved; default adopted)
