@@ -84,7 +84,8 @@ Three caveats, all measured:
   not actively evading and realises 69 % of the speed cap, while the learned prey may use all of
   it. Part of the −16.4 and −15.4 is that handicap, not evasion skill.
 
-Full table and per-episode data: `reports/prey_trial.md`, `runs/hpc_prey/eval_*.json`.
+Full table and per-episode data: `reports/prey_trial.md`, `reports/eval_*.json`. Both policies
+in these tables are published under `models/` so every number can be recomputed.
 
 ## How it works (7 packages, each standalone)
 
