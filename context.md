@@ -12,6 +12,7 @@ Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doc
   venvs `.venv` (CPU torch) + `.venv_gpu` (cu126) built ONLINE on the login node
   (`scripts/hpc/hpc_bootstrap_online.sh`, row 15); partitions cpu_short / gpu_short (row 16);
   **slurmdbd is down — `sacct` never works; detect job completion by absence from `squeue`**;
+  **never `sbatch --export=...` — the job is requeued HELD (row 23); bake values into the script**;
   submit-time cap = 4 jobs per user (array tasks count), so submit GPU work while the array is
   throttled, then raise `scontrol update JobId=<arr> ArrayTaskThrottle=8`.
 - Live jobs: **82268** CPU array (45 units, throttle 8, ~1.7 h/unit → ~10 h; results

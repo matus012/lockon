@@ -45,7 +45,11 @@ scp -o BatchMode=yes -q "${HOST}:${R}/runs/hpc/${BEST}/best.zip" "runs/hpc/${BES
 echo "=== 3 step 9 GPU job (fork verdict n=80, curves, shots), waits for a slot"
 scp -o BatchMode=yes -q scripts/hpc/step9.sbatch "${HOST}:${R}/scripts/hpc/step9.sbatch"
 while [ "$(queued)" -gt 3 ]; do echo "$(date +%H:%M) waiting for a slot"; sleep 300; done
-JOB=$(q "cd ${R} && sbatch --parsable --export=ALL,BEST=${BEST} scripts/hpc/step9.sbatch" | tail -1)
+# NEVER use --export on this cluster: Slurm answers "user env retrieval failed requeued held"
+# and the job sits HELD forever (2026-09-05, deviation row 23). Bake the value in instead.
+q "cd ${R} && sed 's|^set -euo pipefail\$|set -euo pipefail
+BEST=\"${BEST}\"|' scripts/hpc/step9.sbatch > runs/step9_${BEST}.sbatch"
+JOB=$(q "cd ${R} && sbatch --parsable runs/step9_${BEST}.sbatch" | tail -1)
 echo "step9 job $JOB"
 # completion by absence from squeue (slurmdbd unreachable: sacct "Connection refused")
 while q "squeue -h -j ${JOB} -o %i" | grep -q "${JOB}"; do sleep 120; done
