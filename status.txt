@@ -1,5 +1,5 @@
-STATUS: 7/12 — IN PROGRESS — CPU array 82268 running on PERUN (45 units, ~1.7 h each, throttle 2 to keep a GPU slot); GPU probe + learned-prey trial queued behind the site's 4-job cap
-RETENTION: static 45.9% · scripted 56.2% · ppo 53.2% (local, 20 episodes, held-out seeds 1000-1019)
-HPC: 82268 array 0/45 done · 0.0/70 GPU-h spent (planned <=22: probe 0.25 + prey <=19.5 + renders <=2); CPU-h re-estimated 45 -> 90 from measurement (row 17)
+STATUS: 7/12 — IN PROGRESS — PERUN: CPU array 82268 running 8-wide (45 units, ~1.7 h each, ETA ~10 h); learned-prey trial 82273 training on an H200 (device=cuda verified)
+RETENTION (n=80, held-out seeds 1000-1079, mid difficulty): static 44.0% · scripted 52.0% · ppo 51.3% — both hunters beat static (+8.0 [+2.3,+13.7] and +7.3 [+1.1,+13.5]); scripted - ppo = +0.7 [-5.1,+6.5] = indistinguishable
+HPC: 82268 array 0/45 done · ~0.05/70 GPU-h spent (prey trial <=19.5 running, step-9 renders <=2 queued)
 NEEDS YOU: none
-ppo_vs_scripted: 2 of 3 (attempt 3 = the HPC array, judged at n=80 held-out episodes at step 9)
+ppo_vs_scripted: 2 of 3 (attempt 3 = the HPC array, verdict at step 9 on seeds 1000-1079)
