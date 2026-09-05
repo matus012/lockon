@@ -17,10 +17,8 @@ for SEED in 1 2; do
     [ "${a:-1}" -eq 0 ] && [ "${n:-9}" -le 2 ] && break
     echo "$(date +%H:%M) array_jobs=$a queued=$n"; sleep 600
   done
-  # see deviation row 23: --export leaves the job HELD on this cluster
-  q "cd ${R} && sed 's|^set -euo pipefail\$|set -euo pipefail
-SEED=${SEED}|' scripts/hpc/prey_replicate.sbatch > runs/prey_rep_s${SEED}.sbatch"
-  JOB=$(q "cd ${R} && sbatch --parsable runs/prey_rep_s${SEED}.sbatch" | tail -1)
+  # the seed goes as a positional arg; --export leaves the job HELD here (row 23)
+  JOB=$(q "cd ${R} && sbatch --parsable scripts/hpc/prey_replicate.sbatch ${SEED}" | tail -1)
   echo "seed ${SEED} -> job ${JOB}"
   while q "squeue -h -j ${JOB} -o %i" | grep -q "${JOB}"; do sleep 300; done
   echo "seed ${SEED} finished"

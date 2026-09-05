@@ -10,10 +10,11 @@
 #SBATCH --error=runs/hpc/logs/%x_%j.err
 # Step 9 (plan.md §5): fork verdict at n=80 held-out episodes, degradation curves ± std with the
 # HPC-best policy, three shots + GIFs rendered with EGL. ≤ 2 GPU-h. Needs BEST=<unit name>
-# (from scripts/hpc/aggregate.py -> reports/hpc/best_unit.txt), passed via --export=BEST=...
+# (from scripts/hpc/aggregate.py -> reports/hpc/best_unit.txt), passed as the first argument.
 set -euo pipefail
 [ -f scripts/hpc/unit.py ] || { echo "submit from the repo root" >&2; exit 2; }
-: "${BEST:?BEST=<unit> required (sbatch --export=ALL,BEST=...)}"
+BEST="${1:-${BEST:-}}"   # `sbatch step9.sbatch <unit>`; NEVER --export (row 23: job held)
+[ -n "$BEST" ] || { echo "usage: sbatch step9.sbatch <best-unit>" >&2; exit 2; }
 export PYTHON="$PWD/.venv_gpu/bin/python"
 source scripts/hpc/hpc_env.sh
 export MUJOCO_GL=egl

@@ -13,10 +13,11 @@
 # visibility reward) is reported separately and is not replaced by these runs.
 # The headline claim — "the scripted hunter is the only policy the learned evader cannot
 # degrade" — rested on one prey training run; this tests whether it replicates.
-# Requires SEED=<n> (sbatch --export=ALL,SEED=1). Measured cost of seed 0: ~2.3 GPU-h.
+# Usage: sbatch scripts/hpc/prey_replicate.sbatch <seed>. Measured cost of seed 0: ~2.3 GPU-h.
 set -euo pipefail
 [ -f scripts/hpc/unit.py ] || { echo "submit from the repo root" >&2; exit 2; }
-: "${SEED:?SEED=<n> required}"
+SEED="${1:-${SEED:-}}"   # `sbatch prey_replicate.sbatch <seed>`; NEVER --export (row 23)
+[ -n "$SEED" ] || { echo "usage: sbatch prey_replicate.sbatch <seed>" >&2; exit 2; }
 export PYTHON="$PWD/.venv_gpu/bin/python"
 source scripts/hpc/hpc_env.sh
 export MUJOCO_GL=egl
