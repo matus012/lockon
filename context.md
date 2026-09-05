@@ -6,29 +6,26 @@ graph, §3 gates) → 4. `project.md` only when a decision is questioned (it is 
 Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doctrines.md`.
 
 ## Position
-- **Step 7 of 12 — HPC running** (2026-09-05). Owner approved the launch. PERUN facts: SSH
-  `login02.perun.tuke.sk` (user mafike202, key in ~/.ssh); repo at
-  `/mnt/project/perun26011488/lockon/repo` (data gravity: runs/ stay there); venvs `.venv`
-  (CPU torch) and `.venv_gpu` (cu126) built ONLINE on the login node (`scripts/hpc/
-  hpc_bootstrap_online.sh`, deviation row 15); partitions cpu_short / gpu_short (row 16).
-  Site cap: 4 queued jobs per user (array tasks count) — the array is throttled to 2
-  (`scontrol update JobId=82248 ArrayTaskThrottle=2`) so GPU jobs can be submitted.
-- Jobs: smoke 82247 COMPLETED (SMOKE OK, result moved to `runs/hpc/_smoke_base_d0.3_s0`);
-  CPU array 82248 (45 units, `runs/hpc/<unit>/result.json`; index 0 skipped because the
-  smoke shadowed its path — **resubmit `sbatch --array=0 runs/hpc/submit.sbatch` when the
-  queue has ≤ 3 of my jobs**; fixed for the future via `--results-root runs/hpc_smoke`).
-  GPU: `scripts/hpc/launch_gpu_trial.sh` (dev-box driver, log `runs/hpc_gpu_launch.log`)
-  syncs code, waits for a slot, runs `gpu_probe.sbatch` (≤0.25 GPU-h), then submits
-  `prey_trial.sbatch` (19.5 h wall, 18 h training timeout, 1 GPU, eval table at the end).
-  Monitor `hpc:` events every 5 min in this session.
-- Budget: GPU-h spent 0 so far; planned ≤ 0.25 probe + ≤ 19.5 prey + ≤ 2 renders ≤ 22 of the
-  70 cap the owner set. CPU-h ≈ 45.
-- Next: step 8 nothing owed locally; step 9 when the array finishes → pull result JSONs
-  (HPC_RUNBOOK step 8), pick the best unit by retention vs static on its own eval, pull its
-  best.zip, fork verdict on seeds 1000–1079 (n=80) vs scripted; render curves ± std + three
-  shots on a GPU node (EGL) → pull PNG/GIF; step 10 README H200 line, status READY.
-- Learned-prey trial code landed (commit eca3c39): `lockon.policy.prey_learned`,
-  `lockon.harness.{prey_gym,train_prey}`, `eval --prey`, `configs/prey_gpu.yaml`.
+- **Step 7 of 12 — HPC running** (2026-09-05, owner approved the launch).
+- PERUN facts (all verified this session): SSH `login02.perun.tuke.sk` (user mafike202, key in
+  ~/.ssh); repo `/mnt/project/perun26011488/lockon/repo` (runs/ stay there — data gravity);
+  venvs `.venv` (CPU torch) + `.venv_gpu` (cu126) built ONLINE on the login node
+  (`scripts/hpc/hpc_bootstrap_online.sh`, row 15); partitions cpu_short / gpu_short (row 16);
+  **slurmdbd is down — `sacct` never works; detect job completion by absence from `squeue`**;
+  submit-time cap = 4 jobs per user (array tasks count), so submit GPU work while the array is
+  throttled, then raise `scontrol update JobId=<arr> ArrayTaskThrottle=8`.
+- Live jobs: **82268** CPU array (45 units, throttle 8, ~1.7 h/unit → ~10 h; results
+  `runs/hpc/<unit>/result.json`) · **82273** learned-prey trial on an H200 (`device=cuda`
+  verified; 18 h training timeout, then its own eval table). Probe 82271 passed (CUDA + EGL
+  render + 3.4k steps/s). Local `runs/ppo_local/best.zip` uploaded so both tables can use it.
+- GPU-h: probe ≈ 0.05 spent; prey ≤ 19.5; step-9 renders ≤ 2 → ≤ 22 of the owner's 70 cap.
+- Step 9 is scripted end-to-end: `bash scripts/hpc/run_step9.sh` (waits for 45/45, pulls result
+  JSONs, runs `scripts/hpc/aggregate.py` → `reports/hpc/best_unit.txt`, pulls that best.zip,
+  submits `step9.sbatch` with BEST=<unit> for the n=80 fork verdict + curves + shots on a GPU
+  node, pulls the small artifacts back). Step 10 = swap the hero if the best unit beats
+  scripted, README H200 line, status READY.
+- Local n=80 verdict on the held-out seeds running in parallel (`reports/eval_n80_*.json`) to
+  replace the n=20 README numbers.
 
 ## Architecture (plan §9 D1, D4)
 ```
