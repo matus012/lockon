@@ -9,6 +9,7 @@
 *.safetensors
 *.ckpt
 *.zip
+!models/*.zip
 /runs/
 /checkpoints/
 /weights/

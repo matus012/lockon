@@ -26,7 +26,15 @@ BLOB_EXT = {".pt", ".pth", ".onnx", ".safetensors", ".ckpt", ".npy", ".npz", ".z
 FORBIDDEN_DIRS = ("runs/", "data/", "videos/", "checkpoints/", "weights/")
 SIZE_CEILING = 2 * 1024 * 1024
 DISALLOWED_PACKAGES = {"ultralytics", "boxmot", "yolov5", "mmtrack"}
-ALLOWED_CLASSES = {"plot", "sim-render"}
+ALLOWED_CLASSES = {"plot", "sim-render", "sim-checkpoint"}
+
+# Checkpoints published so the README's numbers are reproducible (review 2026-09-05 F6). Only
+# policies trained ENTIRELY inside this repo's simulator may be listed: they contain no
+# dataset-derived content, which is what the blob ban exists to prevent. Never wildcard.
+ALLOWED_TRACKED_BLOBS: dict[str, str] = {
+    "models/ppo_hunter.zip": "sim-checkpoint",
+    "models/learned_prey_seed0.zip": "sim-checkpoint",
+}
 
 # Every committed visual, classified by a human. Extend deliberately; never wildcard.
 ALLOWED_TRACKED_VISUALS: dict[str, str] = {
@@ -58,8 +66,24 @@ def test_no_tracked_files_in_forbidden_dirs(tracked: list[str]) -> None:
 
 
 def test_no_tracked_blobs_outside_fixtures(tracked: list[str]) -> None:
-    bad = [p for p in tracked if Path(p).suffix.lower() in BLOB_EXT and not p.startswith("tests/fixtures/")]
+    bad = [
+        p for p in tracked
+        if Path(p).suffix.lower() in BLOB_EXT
+        and not p.startswith("tests/fixtures/")
+        and p not in ALLOWED_TRACKED_BLOBS
+    ]
     assert not bad, bad
+
+
+def test_allowlisted_blobs_are_sim_checkpoints_and_small(tracked: list[str]) -> None:
+    """A published checkpoint must be classified, under models/, and small enough to be a policy
+    rather than a dataset (SB3 MlpPolicy [128,128] is well under 5 MB)."""
+    for path, cls in ALLOWED_TRACKED_BLOBS.items():
+        assert cls == "sim-checkpoint", (path, cls)
+        assert path.startswith("models/"), path
+        f = ROOT / path
+        if f.exists():
+            assert f.stat().st_size <= 5 * 1024 * 1024, (path, f.stat().st_size)
 
 
 def test_tracked_visuals_are_allowlisted(tracked: list[str]) -> None:
@@ -102,7 +126,7 @@ def test_every_source_file_is_tracked(tracked: list[str]) -> None:
 def test_no_large_tracked_files_outside_visual_allowlist(tracked: list[str]) -> None:
     big = []
     for p in tracked:
-        if p in ALLOWED_TRACKED_VISUALS:
+        if p in ALLOWED_TRACKED_VISUALS or p in ALLOWED_TRACKED_BLOBS:
             continue
         f = ROOT / p
         if f.exists() and f.stat().st_size > SIZE_CEILING:
