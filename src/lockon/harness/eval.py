@@ -20,7 +20,9 @@ import numpy as np
 
 from lockon.core.schemas import Difficulty
 from lockon.harness.episode import resolve_hunter, run_episode
+from lockon.policy.base import Prey
 from lockon.policy.prey import ScriptedPrey
+from lockon.policy.prey_learned import LearnedPrey
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +35,22 @@ _DIFFICULTY_FIELDS = (
 )
 
 
-def evaluate(policy_name_or_path: str, difficulty: Difficulty, seeds: Iterable[int]) -> dict[str, Any]:
-    """Run `policy_name_or_path` (`static` / `scripted` / a PPO zip path) over `seeds`, returning
-    retention mean/std, mean time-to-reacquire, the per-episode list, and a loss-cause histogram.
+def resolve_prey(name_or_path: str) -> Prey:
+    """`scripted` (default) -> `ScriptedPrey()`, anything else -> `LearnedPrey(path)` (SPEC_prey.md)."""
+    if name_or_path == "scripted":
+        return ScriptedPrey()
+    return LearnedPrey(name_or_path)
+
+
+def evaluate(
+    policy_name_or_path: str,
+    difficulty: Difficulty,
+    seeds: Iterable[int],
+    prey: str = "scripted",
+) -> dict[str, Any]:
+    """Run `policy_name_or_path` (`static` / `scripted` / a PPO zip path) over `seeds` against
+    `prey` (`scripted` or a learned-prey zip path, SPEC_prey.md `--prey`), returning retention
+    mean/std, mean time-to-reacquire, the per-episode list, and a loss-cause histogram.
     """
     retentions: list[float] = []
     ttrs: list[float] = []
@@ -44,7 +59,7 @@ def evaluate(policy_name_or_path: str, difficulty: Difficulty, seeds: Iterable[i
 
     for seed in seeds:
         hunter = resolve_hunter(policy_name_or_path)
-        result = run_episode(difficulty, seed, hunter, ScriptedPrey())
+        result = run_episode(difficulty, seed, hunter, resolve_prey(prey))
         retentions.append(result.retention.retention)
         if not math.isnan(result.retention.time_to_reacquire):
             ttrs.append(result.retention.time_to_reacquire)
@@ -97,6 +112,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--n", type=int, default=20, help="episodes (seeds base..base+n-1)")
     parser.add_argument("--seed-base", type=int, default=0, help="first seed; gates use 1000 (held out from training-time model selection, which used 0..19)")
     parser.add_argument("--difficulty", nargs="+", default=["mid"])
+    parser.add_argument("--prey", default="scripted", help="examiner: scripted | path to a learned-prey zip")
     parser.add_argument("--json", type=str, default=None, help="write full results here")
     args = parser.parse_args(argv)
 
@@ -106,7 +122,7 @@ def main(argv: list[str] | None = None) -> int:
     # Union of {P, Q, static, scripted} so the table always carries both baselines (SPEC.md: "3-row
     # table (static / scripted / policy where applicable)") alongside whatever P/Q were requested.
     names = list(dict.fromkeys([args.policy, args.vs_policy, "static", "scripted"]))
-    results = {name: evaluate(name, difficulty, seeds) for name in names}
+    results = {name: evaluate(name, difficulty, seeds, prey=args.prey) for name in names}
 
     _print_table([results[name] for name in names])
 

@@ -19,6 +19,7 @@ from lockon.core.schemas import (
     CHANNELS,
     EPISODE_STEPS,
     AgentAction,
+    AgentObs,
     Detection,
     Difficulty,
     FloatArray,
@@ -69,6 +70,38 @@ def resolve_hunter(name_or_path: str) -> Hunter:
     if name_or_path == "scripted":
         return ScriptedHunter()
     return PPOHunter(name_or_path)
+
+
+def hunter_frame_stack(hunter: Hunter) -> int:
+    """Frame-stack depth the hunter expects: `PPOHunter.n_stack`, else 1 (single-step `AgentObs`).
+    Shared with `prey_gym.PreyGym`, which drives the same frozen hunter inside its own loop."""
+    return hunter.n_stack if isinstance(hunter, PPOHunter) else 1
+
+
+def hunter_obs_mode(hunter: Hunter) -> str:
+    """`PPOHunter.obs_seen` sidecar convention, else `"lock"` for the rule-based hunters."""
+    return hunter.obs_seen if isinstance(hunter, PPOHunter) else "lock"
+
+
+def init_hunter_stack(
+    obs_vector: npt.NDArray[np.float32], n_stack: int
+) -> deque[npt.NDArray[np.float32]]:
+    """SB3 `VecFrameStack` semantics: zero-filled history, newest observation last (review F7)."""
+    stack: deque[npt.NDArray[np.float32]] = deque(maxlen=n_stack)
+    for _ in range(n_stack - 1):
+        stack.append(np.zeros_like(obs_vector))
+    stack.append(obs_vector)
+    return stack
+
+
+def hunter_action(
+    hunter: Hunter, obs: AgentObs, stack: deque[npt.NDArray[np.float32]]
+) -> AgentAction:
+    """Drives `hunter` exactly as the harness does: `PPOHunter` gets the stacked vector, the
+    rule-based hunters get the single-step `AgentObs` (SPEC_prey.md: same rule for `PreyGym`)."""
+    if isinstance(hunter, PPOHunter):
+        return hunter.act_vector(np.concatenate(list(stack)).astype(np.float64))
+    return hunter.act(obs)
 
 
 def _gt_detections(state: WorldState) -> dict[str, Detection | None]:
@@ -131,13 +164,9 @@ def run_episode(
 
     state = env.state()
     obs = obs_builder.reset(state)
-    n_stack = hunter.n_stack if isinstance(hunter, PPOHunter) else 1
-    obs_mode = hunter.obs_seen if isinstance(hunter, PPOHunter) else "lock"
-    stack: deque[npt.NDArray[np.float32]] = deque(maxlen=n_stack)
-    # SB3 VecFrameStack semantics: zero-filled history, newest observation last (review F7)
-    for _ in range(n_stack - 1):
-        stack.append(np.zeros_like(obs.vector()))
-    stack.append(obs.vector())
+    n_stack = hunter_frame_stack(hunter)
+    obs_mode = hunter_obs_mode(hunter)
+    stack = init_hunter_stack(obs.vector(), n_stack)
 
     states: list[WorldState] = []
     actions: list[AgentAction] = []
@@ -153,10 +182,7 @@ def run_episode(
             scene(env, t)
 
         pvx, pvy = prey.act(state, env.illumination)
-        if isinstance(hunter, PPOHunter):
-            action = hunter.act_vector(np.concatenate(list(stack)).astype(np.float64))
-        else:
-            action = hunter.act(obs)
+        action = hunter_action(hunter, obs, stack)
 
         state = env.step(action, (pvx, pvy))
 

@@ -1,0 +1,25 @@
+# Learned-prey trial GPU config (SPEC_prey.md, plan.md §5 step 7; <=20 GPU-h hard cap).
+# Curriculum: none -- fixed mid difficulty (all five dials at 0.5, train_prey.py._DIFFICULTY_DIAL).
+name: prey_gpu
+seed: 0
+total_steps: 20_000_000
+n_envs: 32
+frame_stack: 4
+n_steps: 1024
+batch_size: 256
+n_epochs: 10
+gamma: 0.99
+gae_lambda: 0.95
+learning_rate: 0.0003
+ent_coef: 0.0
+clip_range: 0.2
+net_arch: [128, 128]
+checkpoint_every: 250_000
+eval_every: 500_000
+eval_episodes: 20
+hunter: scripted
+reward:
+  visible_penalty: 1.0
+  action_l2: 0.01
+  transition_bonus: 0.5
+wall_hours: 18
