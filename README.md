@@ -170,8 +170,8 @@ Everything demo-facing runs on a laptop; the cluster work is a sweep, not a requ
 | where | what | cost |
 |---|---|---|
 | RTX 4060 laptop, CPU | all seven packages, five local PPO runs, the degradation sweep (1 500 episodes), every clip | state-only PPO at ~2.9k env steps/s; a 6M-step run is ~35 min |
-| TUKE PERUN, cpu_short | 45-unit sweep: 5 seeds × 3 reward variants × 3 arena densities, 6M steps each | ~50 CPU-h, 0 GPU-h |
-| TUKE PERUN, gpu_short (H200) | learned-prey trial, 20M steps, plus the curve/clip render pass | ~2.3 GPU-h, ~8k env steps/s |
+| TUKE PERUN, cpu_short | 45-unit sweep: 5 seeds × 3 reward variants × 3 arena densities, 6M steps each | ~74 CPU-h, 0 GPU-h |
+| TUKE PERUN, gpu_short (H200) | three learned-prey trials (20M steps each) + the step-9 verdict, curves and clips | **7.5 GPU-h total**, ~8k env steps/s |
 
 State-only PPO is CPU-optimal (a two-layer MLP over a 26-dim observation), so the array asks for
 no GPU at all. The GPU earns its place on the prey trial's throughput and on EGL offscreen
