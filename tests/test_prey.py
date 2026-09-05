@@ -175,3 +175,24 @@ def test_prey_frame_stack_ordering_matches_vecframestack() -> None:
         hist = [np.zeros(d, dtype=np.float32)] * max(0, 3 - k) + raw[max(0, k - 3) : k + 1]
         expected = np.concatenate(hist[-4:])
         assert np.allclose(s, expected), f"stack mismatch at step {k}"
+
+
+def test_prey_reward_seen_override_uses_tracker_lock() -> None:
+    """Row 20: the evader is paid for breaking the LOCK, not geometric visibility."""
+    import numpy as np
+
+    from lockon.core import Pose2D, WorldState
+    from lockon.policy.prey_learned import PreyRewardConfig, prey_reward
+
+    st = WorldState(
+        t=0, drone=Pose2D(0.0, 0.0, 0.0), person=Pose2D(5.0, 0.0, 0.0),
+        person_visible=True, person_box=np.array([1.0, 1.0, 2.0, 2.0]),
+        raycasts=np.ones(16), illumination_at_person=1.0, in_fov=True, unoccluded=True,
+    )
+    cfg = PreyRewardConfig()
+    a = np.zeros(2)
+    # visible AND locked -> penalised; visible but lock broken -> not penalised, and the
+    # seen->unseen transition bonus fires off the lock, not the geometry
+    assert prey_reward(st, a, was_visible=True, cfg=cfg) == pytest.approx(-cfg.visible_penalty)
+    assert prey_reward(st, a, was_visible=True, cfg=cfg, seen=False) == pytest.approx(cfg.transition_bonus)
+

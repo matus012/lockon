@@ -82,7 +82,7 @@ class PreyGym(gym.Env[ObsType, ActType]):
         self._noise = NoiseInjector(NoiseConfig(**{**vars(EVAL_NOISE), "seed": episode_seed}))
         self._tracker = LockTracker()
         self._tracker.reset()
-        self._tracker.update(self._noise(_gt_detections(state), 0), 0)
+        _, lock0 = self._tracker.update(self._noise(_gt_detections(state), 0), 0)
 
         self._hunter_obs_builder = ObsBuilder(self._env.layout)
         hunter_obs = self._hunter_obs_builder.reset(state)
@@ -92,7 +92,7 @@ class PreyGym(gym.Env[ObsType, ActType]):
 
         self._prey_obs_builder = PreyObsBuilder(self._env.layout)
         prey_obs = self._prey_obs_builder.reset(state)
-        self._prev_visible = state.person_visible
+        self._prev_visible = lock0.locked
         self._t = 0
         info: dict[str, Any] = {"visible": state.person_visible}
         return prey_obs, info
@@ -118,8 +118,9 @@ class PreyGym(gym.Env[ObsType, ActType]):
 
         was_visible = self._prev_visible
         prey_obs = self._prey_obs_builder.step(state)
-        r = prey_reward(state, prey_action, was_visible, self._reward_cfg)
-        self._prev_visible = state.person_visible
+        # the evader is paid for breaking the LOCK, not geometric visibility (row 20)
+        r = prey_reward(state, prey_action, was_visible, self._reward_cfg, seen=lock.locked)
+        self._prev_visible = lock.locked
 
         terminated = self._t >= EPISODE_STEPS
         truncated = False

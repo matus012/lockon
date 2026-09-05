@@ -111,12 +111,20 @@ def prey_reward(
     action: FloatArray,
     was_visible: bool,
     cfg: PreyRewardConfig,
+    seen: bool | None = None,
 ) -> float:
-    """`-visible_penalty` if visible, minus an L2 action penalty, plus `transition_bonus` exactly
-    once on the visible->hidden transition (SPEC_prey.md: the evader is paid for being unseen)."""
-    r = -cfg.visible_penalty if state.person_visible else 0.0
+    """`-visible_penalty` if seen, minus an L2 action penalty, plus `transition_bonus` exactly
+    once on the seen->unseen transition (SPEC_prey.md: the evader is paid for being unseen).
+
+    `seen` defaults to geometric visibility; the training wrapper passes the frozen tracker's
+    lock so the evader optimises the quantity the trial reports (deviation row 20). Paying on
+    `state.person_visible` is the proxy divergence already measured for the hunter in row 8.
+    """
+    if seen is None:
+        seen = state.person_visible
+    r = -cfg.visible_penalty if seen else 0.0
     r -= cfg.action_l2 * float(np.dot(action, action))
-    if was_visible and not state.person_visible:
+    if was_visible and not seen:
         r += cfg.transition_bonus
     return r
 
