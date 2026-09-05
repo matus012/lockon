@@ -1,7 +1,8 @@
-STATUS: 10/12 — NEARLY READY — steps 7-9 complete; only the two corrected-objective prey seeds are still running (~2 h), then the final README pass
-RETENTION (n=80, held-out seeds 1000-1079, mid difficulty): static 44.0% · scripted 52.0% · local PPO 51.3% · HPC best 49.4%
-VERDICT: the plan §6 fork resolved at 3 of 3 — no PPO policy beat the scripted hunter. Hero = scripted, PPO reported honestly. The 45-unit sweep is published as a null: 10/45 units "beat" scripted on their own selection seeds, none survived held-out; the ablation is flat (50.3-52.5% across all nine cells).
-ARTIFACTS: public repo github.com/matus012/lockon @5814388 — README numbers all re-checkable with `uv run python scripts/audit_readme.py` (24 checks, 0 mismatches); both policies published under models/; eval JSONs under reports/evals/
-HPC: 45/45 array (~74 CPU-h) + step 9 done; ~6/70 GPU-h spent, 2 prey seeds still running
-NEEDS YOU: none
+STATUS: 10/12 — READY FOR REVIEW — steps 1-10 complete, all HPC work finished, public repo green (github.com/matus012/lockon @a345417; G0 G8 G9 PASS)
+RETENTION (n=80, held-out seeds 1000-1079, mid difficulty): static 44.0% · scripted 52.0% · local PPO 51.3% · HPC-sweep best 49.4%
+VERDICT: plan §6 fork resolved at 3 of 3 — no PPO policy beat the scripted hunter across 5 local runs and a 45-unit cluster sweep. Hero = scripted hunter; PPO reported honestly. The sweep is published as a null (10/45 "beat" scripted on their own selection seeds, none survived held-out; ablation flat 50.3-52.5%).
+PREY TRIAL (3 evaders, 3 H200 runs): with the corrected objective every policy degrades — pooled static -20.2 [-26.4,-14.0], scripted -9.8 [-17.2,-2.4], PPO -22.5 [-29.0,-16.0]. The ORDERING replicates (scripted gives up 12.7 pts less than PPO [+6.5,+18.9]); immunity does not. Seed variance is large and stated.
+REPRODUCIBILITY: both policies under models/; 17 eval JSONs under reports/evals/; `uv run python scripts/audit_readme.py` re-checks all 24 README numbers (0 mismatches); `scripts/prey_trials_table.py` and `scripts/readme_table.py` regenerate the tables.
+HPC: 45/45 array (~74 CPU-h) + 4 GPU jobs; ~9.4/70 GPU-h spent. Queue empty.
+NEEDS YOU: step 11 — review the repo and decide ship / fix / +300 GPU-h (plan §5 step 11)
 ppo_vs_scripted: 3 of 3 (fork resolved; default adopted)
