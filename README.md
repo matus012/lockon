@@ -46,26 +46,45 @@ all 1,500 sweep episodes every lock loss is attributed to occlusion or field-of-
 darkness or channel dropout: with a dark-immune thermal proxy and at most one dead channel at a
 time, those two axes cannot break lock on their own (a design statement, now also a measurement).
 
-## The evader that learned to hide (PERUN, one H200)
+## An evader trained to break the lock (PERUN, one H200)
 
 A second PPO agent was trained as the **prey** — privileged observations, rewarded for being
-unseen — against the frozen scripted hunter, 20M steps on one H200. Then every camera policy was
-scored against both prey on the same held-out seeds:
+unseen — against the frozen scripted hunter, 20M steps on one H200. Every camera policy was then
+scored against both prey on the same held-out seeds (n = 80, seeds 1000–1079, mid difficulty):
 
-| hunter | vs scripted prey | vs learned prey | Δ (95 % CI) |
-|---|---|---|---|
-| static camera | 44.0 ± 32.1 | 27.6 ± 28.1 | −16.4 [−25.0, −7.7] |
-| scripted hunter | 52.0 ± 33.8 | 50.8 ± 39.0 | −1.2 [−11.8, +9.5] |
-| PPO hunter | 51.3 ± 35.1 | 35.9 ± 31.3 | −15.4 [−25.1, −5.6] |
+| hunter | vs scripted prey | vs learned prey | Δ | median vs learned |
+|---|---|---|---|---|
+| static camera | 44.0 ± 32.1 | 27.6 ± 28.1 | −16.4 | — |
+| scripted hunter | 52.0 ± 33.8 | 50.8 ± 39.0 | −1.2 | 39.5 (from 45.3) |
+| PPO hunter | 51.3 ± 35.1 | 35.9 ± 31.3 | −15.4 | — |
 
-n = 80 episodes per cell, seeds 1000–1079, mid difficulty. Full table: `reports/prey_trial.md`.
+The comparison that carries weight is the **interaction**, paired by seed: the scripted hunter
+gives up 14.2 points less than the PPO hunter under the same evader, CI [+5.1, +23.9], and 15.2
+points less than the static camera, CI [+5.9, +24.7]. Per-arm intervals overlapping zero would
+*not* have established this; the paired difference-in-differences does.
 
-**The hand-written hunter is the only policy the learned evader cannot degrade.** It loses 1.2
-points and the interval spans zero; the fixed camera loses 16.4 and the learned hunter 15.4, both
-with intervals excluding zero. The evader trained *against* the scripted hunter for 20M steps and
-still could not exploit it, while the evasions it found transfer devastatingly to a camera policy
-it had never seen. Caveat: the prey's checkpoint was picked on 20 selection episodes; the table
-above is the held-out read.
+**What the evader actually learned was to leave the frame, not to hide.** Against the two policies
+it degrades, field-of-view losses rise (static 47→63, PPO 10→29) and time-to-reacquire nearly
+doubles; against the scripted hunter, FOV losses *fall* (64→44) and reacquisition gets *faster*.
+A controller that chases re-centres the target; a fixed camera cannot, and the learned hunter
+does so poorly.
+
+Three caveats, all measured:
+
+- **The evader plateaued after 2M of its 20M steps** (37 later evaluations, mean 50.3 ± 3.2, trend
+  slightly *upward*). Its published checkpoint is the minimum of that noisy plateau, −1.9σ, and it
+  regressed to the plateau on held-out seeds exactly as selection noise predicts. Against its own
+  training opponent it never beat the hand-written prey (plateau 53.2 vs scripted prey 54.3). So
+  this is evidence that *this* evader is weak against active pursuit — not that the scripted
+  hunter is robust to adversaries in general.
+- **Its reward paid on geometric visibility, not on tracker lock** — the same proxy divergence
+  already logged for the hunter (deviation row 8), so the optimiser had no gradient on the number
+  being reported. A corrected run is in flight.
+- **The scripted prey it is compared against is speed-handicapped**: it wanders at half speed when
+  not actively evading and realises 69 % of the speed cap, while the learned prey may use all of
+  it. Part of the −16.4 and −15.4 is that handicap, not evasion skill.
+
+Full table and per-episode data: `reports/prey_trial.md`, `runs/hpc_prey/eval_*.json`.
 
 ## How it works (7 packages, each standalone)
 
@@ -110,9 +129,9 @@ unaffected by light level.
   of view (row 9). Letting the policy observe the tracker's lock instead of geometry (row 12)
   made it worse on held-out seeds (row 13). Three local PPO designs; one passes the floor, none
   beats the scripted hunter.
-- **The learned policy never beat the script, and breaks under pressure.** The prey trial above
-  is the sharpest version: under an adversarially trained evader the PPO hunter loses 15 points
-  while the scripted one loses 1. Five local training runs (three of them
+- **The learned policy never beat the script, and degrades faster under pressure.** Under the
+  learned evader the PPO hunter gives up 14.2 points more than the scripted one (paired CI
+  [+5.1, +23.9]) — though see the three caveats on that trial above. Five local training runs (three of them
   instrument-defective and diagnosed as such) and a 45-unit HPC sweep over seeds, reward
   variants and arena densities; the best PPO hunter ties the hand-written one. What PPO does
   buy is a faster reacquisition (1.70 vs 2.09 steps) at the same retention.
