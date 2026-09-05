@@ -1,5 +1,5 @@
-STATUS: 7/12 — IN PROGRESS — HPC launch approved 2026-09-05; bundle + online venv + smoke/array submission running (scripts/hpc/launch_cpu_array.sh); learned-prey entrypoint being built for the ≤20 GPU-h trial
-RETENTION: static 45.9% · scripted 56.2% · ppo 53.2% (20 episodes, mid difficulty, noise dial 0.3, held-out seeds 1000-1019)
-HPC: submitting · 0/70 GPU-h spent (plan ≤22: prey ≤19 + renders ≤2; CPU array 45 units on cpu_short, 0 GPU-h)
+STATUS: 7/12 — IN PROGRESS — PERUN: smoke OK; CPU array 82248 running (45 units, throttle 2, ~1 h/unit); GPU probe + learned-prey trial queued behind the site's 4-job cap (scripts/hpc/launch_gpu_trial.sh)
+RETENTION: static 45.9% · scripted 56.2% · ppo 53.2% (local, 20 episodes, held-out seeds 1000-1019)
+HPC: 82248 array 0/45 done · 0.0/70 GPU-h spent (planned ≤22: probe 0.25 + prey ≤19.5 + renders ≤2)
 NEEDS YOU: none
-ppo_vs_scripted: 2 of 3 (attempt 3 = the HPC array, judged at n>=80 held-out episodes at step 9)
+ppo_vs_scripted: 2 of 3 (attempt 3 = the HPC array, judged at n=80 held-out episodes at step 9)
