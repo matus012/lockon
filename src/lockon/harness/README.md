@@ -1,54 +1,56 @@
 # lockon.harness
 
 The composition root (plan.md §9 D1): the only package allowed to import env, sensor, track and
-policy together, and the owner of every CLI (bench, render, train, eval, sweep) plus the
-Gymnasium wrapper. Runs one episode end to end (`episode.py`), attributes lock-loss causes,
-renders every visual the owner sees, trains PPO on state (CPU by design), evaluates policies
-head to head on lock retention %, and sweeps the 5 difficulty axes into curves. Perception is
-frozen for every number the owner reads: `EVAL_NOISE = NoiseConfig.from_dial(0.3, seed=0)` +
-`LockTracker()` defaults, one constant, one place.
+policy together, and the owner of every CLI (bench, render, train, train_prey, eval, sweep) plus
+the two Gymnasium wrappers (hunter-training `LockonGym`, prey-training `PreyGym`). Runs one episode
+end to end (`episode.py`), attributes lock-loss causes, renders every visual the owner sees,
+trains PPO on state (CPU by design), evaluates policies on lock retention %, and sweeps the 5
+difficulty axes into curves. Perception is frozen for every number the owner reads: `EVAL_NOISE =
+NoiseConfig.from_dial(0.3, seed=0)` + `LockTracker()` defaults, one constant, one place —
+`episode.py`'s hunter-driving helpers are that one place, shared by `run_episode` and `PreyGym`.
 
 Import rule (`tests/test_boundaries.py`): `harness` may import `core`, `env`, `sensor`, `track`,
 `policy`, `harness` — i.e. anything.
 
 ## Public API
-- `episode.EpisodeResult` (seed, difficulty, policy, states, actions, gt_boxes, tracks, lock, retention, loss_causes, frames); `episode.Scene = Callable[[Env, int], None]`.
-- `episode.run_episode(difficulty, seed, hunter, prey, *, steps=EPISODE_STEPS, scene=None, capture=False, noise=None) -> EpisodeResult` —
-  a fresh `LockTracker` + a `NoiseInjector` reseeded with the episode `seed` each call (`noise`
-  given, else `EVAL_NOISE`'s dial); a `PPOHunter` gets an SB3-style stacked vector (`hunter.n_stack`
-  frames, zero-filled history at episode start, newest last — matches `VecFrameStack`).
-- `episode.resolve_hunter(name_or_path) -> Hunter` — `"static"`/`"scripted"`/path→`PPOHunter`.
-- `episode.EVAL_NOISE: NoiseConfig` — the frozen eval-time noise dial (per-episode seed, not shared).
-- `scenes.SCENES: dict[str, SceneSpec]` — `"occlusion"`, `"lights_cut"`, `"sensor3"`, `"chase"` (built lazily; `occlusion` runs a seed search).
-- `scenes.select_occlusion_seed() -> int`; `scenes.occlusion_showcase_ok(states, retained) -> bool`.
-- `gym_env.LockonGym(difficulty, seed, prey, reward)` — `gymnasium.Env`, obs `Box((AgentObs.size(),))`,
-  action `Box((3,))`; runs its own frozen `LockTracker` in `step()` and rewards/observes its lock,
-  not raw state visibility (D13/D15); `reset()` resamples layout + prey seed every call.
-- `eval.evaluate(policy_name_or_path, difficulty, seeds) -> dict[str, Any]` — retention mean/std,
-  ttr, loss-cause histogram; CLI adds `--seed-base` (gates use 1000, held out from 0..19 model selection).
-- `train.train(...)`, `train.build_vec_env(cfg, seed, start_dial, overrides=None) -> VecFrameStack`.
-- `sweep.run_sweep(..., workers=None) -> list[dict]` — `multiprocessing.Pool` (spawn), default
-  `min(6, cpu_count()//2)` (memory-bound, `--workers` overrides); each cell is saved to
-  `results.json` as it finishes (`imap_unordered`, not `starmap` — a mid-sweep crash loses only
-  in-flight cells). `sweep.write_curves(rows, cfg)`, `sweep.write_failure_report(rows, cfg)`.
-- CLIs: `bench_env.py`, `render.py`, `train.py`, `eval.py`, `sweep.py` (each `main(argv=None) -> int`, see gates below).
+- `episode.EpisodeResult` (seed, difficulty, policy, states, actions, gt_boxes, tracks, lock,
+  retention, loss_causes, frames); `run_episode(difficulty, seed, hunter, prey, *, steps=EPISODE_STEPS,
+  scene=None, capture=False, noise=None) -> EpisodeResult`; `resolve_hunter(name_or_path) -> Hunter`;
+  `EVAL_NOISE: NoiseConfig` (frozen eval-time dial).
+- Shared hunter-driving helpers (`episode.py`, single source of truth for `run_episode` and
+  `prey_gym.PreyGym`): `hunter_frame_stack`, `hunter_obs_mode`, `init_hunter_stack` (SB3 zero-fill),
+  `hunter_action` — so training and eval never diverge.
+- `prey_gym.PreyGym(difficulty, seed, hunter, hunter_frame_stack, reward: PreyRewardConfig)` —
+  `gymnasium.Env`, obs `Box((PreyObsBuilder.size(),))`, action `Box((2,))`; prey is the RL agent,
+  `hunter` is FROZEN and driven by the helpers above; pays on the tracker's lock, not raw
+  visibility (row 20); `set_difficulty(...)` curriculum hook (unused by `configs/prey_gpu.yaml`).
+- `scenes.SCENES` — `"occlusion"`/`"lights_cut"`/`"sensor3"`/`"chase"`; `select_occlusion_seed()`.
+  `gym_env.LockonGym(difficulty, seed, prey, reward)` — hunter-training `gymnasium.Env`, own frozen
+  `LockTracker`, rewards its lock (D13/D15).
+- `eval.evaluate(policy_name_or_path, difficulty, seeds, prey="scripted") -> dict[str, Any]` —
+  retention mean/std, ttr, loss-cause histogram; CLI: `--seed-base` (gates use 1000), `--prey
+  scripted|<zip>` via `resolve_prey` (`"scripted"`→`ScriptedPrey()`, else `LearnedPrey(path)`).
+- `train.train(...)`, `train.build_vec_env(...)`. `train_prey.train_prey(config_path, out,
+  hunter_name, *, device=None, resume=False, wall_hours=None, total_steps=None, n_envs=None) ->
+  Path` — mirrors `train.py` against a frozen `hunter`; `best.zip` = LOWEST hunter retention,
+  sidecar `{"hunter", "obs": "prey_v1"}`; `--device cuda` exits 3 on a CPU fallback (STOP, §5).
+- `sweep.run_sweep(...) -> list[dict]`, `write_curves(...)`, `write_failure_report(...)`. CLIs:
+  `bench_env.py`, `render.py`, `train.py`, `train_prey.py`, `eval.py`, `sweep.py` (prey trial changes no gate).
 
 ## Deviations from SPEC
-- `scenes.py`'s occlusion showcase seed: SPEC's fixed seed 11 produces a 30-step gap equal to the
-  tracker's coast buffer, so the id dies mid-shot. Replaced with `select_occlusion_seed()` — first
-  seed in 11..60 passing `occlusion_showcase_ok` (gap ≥ 5 steps, post-gap retention ≥ 0.8, same
-  id); the rule is written once and never hand-tuned — deviation-log row 7.
+- `scenes.py`'s occlusion showcase seed: SPEC's fixed seed 11 gives a 30-step gap equal to the
+  tracker's coast buffer, id dies mid-shot. Replaced with `select_occlusion_seed()`, first seed in
+  11..60 passing `occlusion_showcase_ok`, written once, never hand-tuned (row 7). `PreyGym.reset()`
+  primes its tracker with an extra `t=0` update before stepping at `t=1` (`run_episode` doesn't) —
+  a one-step offset (~1/200), direction unmeasured (row 21).
 
-## Invariants (tests/test_harness.py, tests/test_train_sweep.py)
-- `run_episode` produces consistent lengths, retention in [0,1], `gt_boxes[t] is None` iff not visible: `test_run_episode_basic_consistency`.
-- `occlusion` scene genuinely occludes then recovers: `test_occlusion_scene_actually_occludes`.
-- `lights_cut` scene kills rgb, thermal proxy keeps seeing: `test_lights_cut_scene_kills_rgb_keeps_thermal`.
-- `LockonGym` passes `gymnasium`'s `check_env` plus 20 random steps, and reseeds layout + prey every
-  episode (SB3 calls `reset(seed=None)`): `test_lockon_gym_check_env_and_random_steps`, `test_gym_resamples_layout_every_episode`.
-- `evaluate("static"/"scripted", ...)` returns finite numbers: `test_evaluate_returns_finite_numbers`.
-- Render smoke produces a real GIF file: `test_render_smoke_produces_a_gif`.
-- Training smoke writes `best.zip` + a log, frame-stack order matches SB3's `VecFrameStack`: `test_train_smoke_writes_best_and_log`, `test_frame_stack_ordering_matches_vecframestack`.
-- Sweep smoke writes outputs and resumes (skips completed cells): `test_sweep_smoke_writes_outputs_and_resumes`.
+## Invariants (tests/test_harness.py, tests/test_train_sweep.py, tests/test_prey.py)
+- `run_episode`: consistent lengths, retention in [0,1], `gt_boxes[t] is None` iff not visible;
+  `occlusion` occludes then recovers, `lights_cut` kills rgb but not thermal; `evaluate(...)`
+  returns finite numbers; render smoke produces a real GIF.
+- `LockonGym`/`PreyGym` both pass `check_env` and reseed layout + prey every episode; training
+  smoke (hunter and prey) writes `best.zip` + log/sidecar, frame-stack order matches `VecFrameStack`
+  for both; sweep smoke writes outputs and resumes (skips completed cells).
 
 ## Gates (plan.md §3)
 ```

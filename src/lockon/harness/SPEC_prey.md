@@ -20,8 +20,12 @@ relative/π · `person_visible` (0/1) · illumination at person · the 4 nearest
 
 ## Prey action + reward
 Action Box(-1, 1, (2,)) → world-frame velocity × `person_max_speed(difficulty)` (env clamps).
-`prey_reward = −1·[person_visible] − 0.01·‖a‖² + 0.5·[transition visible→hidden]`
-(the evader is paid for being unseen, with a small bonus for breaking line of sight).
+`prey_reward = −1·[seen] − 0.01·‖a‖² + 0.5·[transition seen→unseen]`
+(the evader is paid for being unseen, with a small bonus for breaking the lock). **AMENDED
+2026-09-05 (deviation row 20):** `seen` is the frozen tracker's lock, not `state.person_visible`
+— the signature carries `seen: bool | None = None`, defaulting to geometric visibility for
+callers that have no tracker. Attempt 1 (seed 0) ran the pre-amendment version and is reported
+as such.
 `PreyRewardConfig` frozen dataclass; YAML-loadable.
 
 ## PreyGym
@@ -29,7 +33,9 @@ Action Box(-1, 1, (2,)) → world-frame velocity × `person_max_speed(difficulty
 episode seed on every reset (same rule as `LockonGym`); the hunter is FROZEN and runs inside
 `step()` exactly as the harness runs it (ScriptedHunter on `ObsBuilder`, PPOHunter via its
 stacked vector and `obs_seen` sidecar convention; the frozen tracker feeds the hunter's
-"seen" when its `obs_seen == "lock"`). `set_difficulty` for a curriculum. State only.
+"seen" when its `obs_seen == "lock"`). `set_difficulty` for a curriculum. State only. **Known offset (row 21):** `reset()` primes the
+tracker with one `t=0` update and the loop then steps at `t=1`, whereas `run_episode` primes with
+none — a one-step perception difference between prey training and evaluation.
 
 ## train_prey.py — `python -m lockon.harness.train_prey --config configs/prey_gpu.yaml --out runs/prey --hunter scripted|<zip> [--device cuda|cpu] [--wall-hours 18] [--resume]`
 Same skeleton as `train.py` (SubprocVecEnv spawn, VecMonitor, VecFrameStack, checkpoints,
