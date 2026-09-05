@@ -32,8 +32,8 @@ gpu_h:
   renders: 2
 
 slurm:
-  partition: "<FILL-PERUN-PARTITION>"
-  account: "<FILL-PERUN-ACCOUNT>"
+  partition: "cpu_short"
+  account: "perun26011488"
   cpus_per_task: 8
   mem: "16G"
   max_concurrent: 8
@@ -43,8 +43,8 @@ slurm:
   budget_ceiling_h: 70
 
 gpu_slurm:
-  partition: "<FILL-PERUN-PARTITION>"
-  account: "<FILL-PERUN-ACCOUNT>"
+  partition: "gpu_short"
+  account: "perun26011488"
   gres: "gpu:1"
   cpus_per_task: 8
   mem: "32G"
