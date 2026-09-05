@@ -1,0 +1,1106 @@
+{
+  "n_units": 45,
+  "best_unit": "k_short_d0.3_s3",
+  "ablation": [
+    {
+      "reward_variant": "base",
+      "arena_density": 0.3,
+      "n": 5,
+      "mean": 0.5224,
+      "std": 0.01409853715815935
+    },
+    {
+      "reward_variant": "base",
+      "arena_density": 0.5,
+      "n": 5,
+      "mean": 0.51065,
+      "std": 0.027879539989031383
+    },
+    {
+      "reward_variant": "base",
+      "arena_density": 0.7,
+      "n": 5,
+      "mean": 0.50335,
+      "std": 0.03163443535136989
+    },
+    {
+      "reward_variant": "k_short",
+      "arena_density": 0.3,
+      "n": 5,
+      "mean": 0.51895,
+      "std": 0.03710559257039289
+    },
+    {
+      "reward_variant": "k_short",
+      "arena_density": 0.5,
+      "n": 5,
+      "mean": 0.5121,
+      "std": 0.033258739452961796
+    },
+    {
+      "reward_variant": "k_short",
+      "arena_density": 0.7,
+      "n": 5,
+      "mean": 0.5249,
+      "std": 0.026020184472827945
+    },
+    {
+      "reward_variant": "lam_hi",
+      "arena_density": 0.3,
+      "n": 5,
+      "mean": 0.50545,
+      "std": 0.0202256025868205
+    },
+    {
+      "reward_variant": "lam_hi",
+      "arena_density": 0.5,
+      "n": 5,
+      "mean": 0.5088999999999999,
+      "std": 0.03423567218560198
+    },
+    {
+      "reward_variant": "lam_hi",
+      "arena_density": 0.7,
+      "n": 5,
+      "mean": 0.5198499999999999,
+      "std": 0.018956034659179104
+    }
+  ],
+  "units": [
+    {
+      "unit": "base_d0.3_s0",
+      "reward_variant": "base",
+      "arena_density": 0.3,
+      "seed": 0,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5327499999999998
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3773409433125433
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5946.119690418243,
+        "eval_s": 9.784101247787476
+      }
+    },
+    {
+      "unit": "base_d0.3_s1",
+      "reward_variant": "base",
+      "arena_density": 0.3,
+      "seed": 1,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.51
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.34672395359997843
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6127.667701244354,
+        "eval_s": 8.350345611572266
+      }
+    },
+    {
+      "unit": "base_d0.3_s2",
+      "reward_variant": "base",
+      "arena_density": 0.3,
+      "seed": 2,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5115
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3636863346346683
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6085.889263629913,
+        "eval_s": 8.290062189102173
+      }
+    },
+    {
+      "unit": "base_d0.3_s3",
+      "reward_variant": "base",
+      "arena_density": 0.3,
+      "seed": 3,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5417500000000001
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.35783472092573687
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5971.381242752075,
+        "eval_s": 8.296122074127197
+      }
+    },
+    {
+      "unit": "base_d0.3_s4",
+      "reward_variant": "base",
+      "arena_density": 0.3,
+      "seed": 4,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.516
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3606854585369363
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5848.046625137329,
+        "eval_s": 8.278801202774048
+      }
+    },
+    {
+      "unit": "base_d0.5_s0",
+      "reward_variant": "base",
+      "arena_density": 0.5,
+      "seed": 0,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.53025
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3612979206970336
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5597.293533563614,
+        "eval_s": 8.218733072280884
+      }
+    },
+    {
+      "unit": "base_d0.5_s1",
+      "reward_variant": "base",
+      "arena_density": 0.5,
+      "seed": 1,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.49675
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.32983433341603474
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5668.334454059601,
+        "eval_s": 8.264472246170044
+      }
+    },
+    {
+      "unit": "base_d0.5_s2",
+      "reward_variant": "base",
+      "arena_density": 0.5,
+      "seed": 2,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.4845
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.37455940783806246
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5607.398098945618,
+        "eval_s": 8.128491640090942
+      }
+    },
+    {
+      "unit": "base_d0.5_s3",
+      "reward_variant": "base",
+      "arena_density": 0.5,
+      "seed": 3,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.49224999999999997
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3534560616257698
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5282.0350959300995,
+        "eval_s": 8.240005254745483
+      }
+    },
+    {
+      "unit": "base_d0.5_s4",
+      "reward_variant": "base",
+      "arena_density": 0.5,
+      "seed": 4,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5495
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.36789910301603074
+      },
+      "beats_static": true,
+      "beats_scripted": true,
+      "runtimes": {
+        "train_s": 5476.897461414337,
+        "eval_s": 8.296907186508179
+      }
+    },
+    {
+      "unit": "base_d0.7_s0",
+      "reward_variant": "base",
+      "arena_density": 0.7,
+      "seed": 0,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.501
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.361706372628407
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5818.436888456345,
+        "eval_s": 8.290165185928345
+      }
+    },
+    {
+      "unit": "base_d0.7_s1",
+      "reward_variant": "base",
+      "arena_density": 0.7,
+      "seed": 1,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.47675
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3470240445559932
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5673.429696798325,
+        "eval_s": 8.371002912521362
+      }
+    },
+    {
+      "unit": "base_d0.7_s2",
+      "reward_variant": "base",
+      "arena_density": 0.7,
+      "seed": 2,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.4709999999999999
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3338472704695966
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5834.307567596436,
+        "eval_s": 8.266252994537354
+      }
+    },
+    {
+      "unit": "base_d0.7_s3",
+      "reward_variant": "base",
+      "arena_density": 0.7,
+      "seed": 3,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5475
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3488606455305614
+      },
+      "beats_static": true,
+      "beats_scripted": true,
+      "runtimes": {
+        "train_s": 5961.511172533035,
+        "eval_s": 8.279608011245728
+      }
+    },
+    {
+      "unit": "base_d0.7_s4",
+      "reward_variant": "base",
+      "arena_density": 0.7,
+      "seed": 4,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5205
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.37911706635286146
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6048.737412452698,
+        "eval_s": 8.214234352111816
+      }
+    },
+    {
+      "unit": "k_short_d0.3_s0",
+      "reward_variant": "k_short",
+      "arena_density": 0.3,
+      "seed": 0,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.505
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3532952023450078
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6059.229177951813,
+        "eval_s": 8.649034261703491
+      }
+    },
+    {
+      "unit": "k_short_d0.3_s1",
+      "reward_variant": "k_short",
+      "arena_density": 0.3,
+      "seed": 1,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5479999999999999
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.35431059820445676
+      },
+      "beats_static": true,
+      "beats_scripted": true,
+      "runtimes": {
+        "train_s": 5878.394932508469,
+        "eval_s": 8.582514524459839
+      }
+    },
+    {
+      "unit": "k_short_d0.3_s2",
+      "reward_variant": "k_short",
+      "arena_density": 0.3,
+      "seed": 2,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.46299999999999997
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3347215260481465
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6076.579568386078,
+        "eval_s": 8.54671025276184
+      }
+    },
+    {
+      "unit": "k_short_d0.3_s3",
+      "reward_variant": "k_short",
+      "arena_density": 0.3,
+      "seed": 3,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5552499999999998
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.36822708686352773
+      },
+      "beats_static": true,
+      "beats_scripted": true,
+      "runtimes": {
+        "train_s": 5854.760772705078,
+        "eval_s": 8.561642408370972
+      }
+    },
+    {
+      "unit": "k_short_d0.3_s4",
+      "reward_variant": "k_short",
+      "arena_density": 0.3,
+      "seed": 4,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5235000000000001
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3468468682286176
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6093.71738243103,
+        "eval_s": 8.481140613555908
+      }
+    },
+    {
+      "unit": "k_short_d0.5_s0",
+      "reward_variant": "k_short",
+      "arena_density": 0.5,
+      "seed": 0,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5447499999999998
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3750215827122488
+      },
+      "beats_static": true,
+      "beats_scripted": true,
+      "runtimes": {
+        "train_s": 5964.5670337677,
+        "eval_s": 8.4464111328125
+      }
+    },
+    {
+      "unit": "k_short_d0.5_s1",
+      "reward_variant": "k_short",
+      "arena_density": 0.5,
+      "seed": 1,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5475
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.36877330434834893
+      },
+      "beats_static": true,
+      "beats_scripted": true,
+      "runtimes": {
+        "train_s": 5674.052095413208,
+        "eval_s": 8.617074012756348
+      }
+    },
+    {
+      "unit": "k_short_d0.5_s2",
+      "reward_variant": "k_short",
+      "arena_density": 0.5,
+      "seed": 2,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.47300000000000003
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.35813544923673785
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5737.591831922531,
+        "eval_s": 8.456126689910889
+      }
+    },
+    {
+      "unit": "k_short_d0.5_s3",
+      "reward_variant": "k_short",
+      "arena_density": 0.5,
+      "seed": 3,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5065000000000001
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3671481308681824
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5804.368582248688,
+        "eval_s": 8.517396211624146
+      }
+    },
+    {
+      "unit": "k_short_d0.5_s4",
+      "reward_variant": "k_short",
+      "arena_density": 0.5,
+      "seed": 4,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.4887499999999999
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3704047617134531
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5811.024010181427,
+        "eval_s": 8.324633598327637
+      }
+    },
+    {
+      "unit": "k_short_d0.7_s0",
+      "reward_variant": "k_short",
+      "arena_density": 0.7,
+      "seed": 0,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.50875
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.352114594272944
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6287.5333087444305,
+        "eval_s": 8.355427026748657
+      }
+    },
+    {
+      "unit": "k_short_d0.7_s1",
+      "reward_variant": "k_short",
+      "arena_density": 0.7,
+      "seed": 1,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.50925
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3561785893340586
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6036.342839241028,
+        "eval_s": 8.319552183151245
+      }
+    },
+    {
+      "unit": "k_short_d0.7_s2",
+      "reward_variant": "k_short",
+      "arena_density": 0.7,
+      "seed": 2,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5539999999999999
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3408944118051805
+      },
+      "beats_static": true,
+      "beats_scripted": true,
+      "runtimes": {
+        "train_s": 6402.420974493027,
+        "eval_s": 8.290738105773926
+      }
+    },
+    {
+      "unit": "k_short_d0.7_s3",
+      "reward_variant": "k_short",
+      "arena_density": 0.7,
+      "seed": 3,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5002500000000001
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.34770129062170596
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 4011.5592336654663,
+        "eval_s": 8.217748403549194
+      }
+    },
+    {
+      "unit": "k_short_d0.7_s4",
+      "reward_variant": "k_short",
+      "arena_density": 0.7,
+      "seed": 4,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5522499999999999
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3633575202194114
+      },
+      "beats_static": true,
+      "beats_scripted": true,
+      "runtimes": {
+        "train_s": 6412.442672252655,
+        "eval_s": 8.140114545822144
+      }
+    },
+    {
+      "unit": "lam_hi_d0.3_s0",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.3,
+      "seed": 0,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.49449999999999994
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3637921796850504
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5749.890098810196,
+        "eval_s": 8.16374945640564
+      }
+    },
+    {
+      "unit": "lam_hi_d0.3_s1",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.3,
+      "seed": 1,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.49574999999999997
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.35583098164718596
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5812.245463132858,
+        "eval_s": 10.080110549926758
+      }
+    },
+    {
+      "unit": "lam_hi_d0.3_s2",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.3,
+      "seed": 2,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.488
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3581598805003151
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5840.330576181412,
+        "eval_s": 8.322575569152832
+      }
+    },
+    {
+      "unit": "lam_hi_d0.3_s3",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.3,
+      "seed": 3,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5385
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.36902608308898704
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5944.271000862122,
+        "eval_s": 8.510321855545044
+      }
+    },
+    {
+      "unit": "lam_hi_d0.3_s4",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.3,
+      "seed": 4,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5105
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3541853328414377
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6426.721235752106,
+        "eval_s": 8.45499038696289
+      }
+    },
+    {
+      "unit": "lam_hi_d0.5_s0",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.5,
+      "seed": 0,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.49799999999999994
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3433853520463563
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5804.647238492966,
+        "eval_s": 8.566793203353882
+      }
+    },
+    {
+      "unit": "lam_hi_d0.5_s1",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.5,
+      "seed": 1,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5185
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.35250567371320424
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5755.587565422058,
+        "eval_s": 8.492727756500244
+      }
+    },
+    {
+      "unit": "lam_hi_d0.5_s2",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.5,
+      "seed": 2,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.45599999999999996
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.34941951863054244
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5749.76974105835,
+        "eval_s": 8.353793382644653
+      }
+    },
+    {
+      "unit": "lam_hi_d0.5_s3",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.5,
+      "seed": 3,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.54625
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3590643222321037
+      },
+      "beats_static": true,
+      "beats_scripted": true,
+      "runtimes": {
+        "train_s": 5771.585006713867,
+        "eval_s": 8.562539100646973
+      }
+    },
+    {
+      "unit": "lam_hi_d0.5_s4",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.5,
+      "seed": 4,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5257499999999999
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3601918759494722
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 5793.715945005417,
+        "eval_s": 8.568289756774902
+      }
+    },
+    {
+      "unit": "lam_hi_d0.7_s0",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.7,
+      "seed": 0,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.503
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.35698529381474525
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6345.2759165763855,
+        "eval_s": 8.545670509338379
+      }
+    },
+    {
+      "unit": "lam_hi_d0.7_s1",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.7,
+      "seed": 1,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5162500000000001
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.37980546007133703
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6215.006404161453,
+        "eval_s": 8.58444333076477
+      }
+    },
+    {
+      "unit": "lam_hi_d0.7_s2",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.7,
+      "seed": 2,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.51375
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.35696244550372525
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6151.6016936302185,
+        "eval_s": 8.546541452407837
+      }
+    },
+    {
+      "unit": "lam_hi_d0.7_s3",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.7,
+      "seed": 3,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.5525
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3575384594697471
+      },
+      "beats_static": true,
+      "beats_scripted": true,
+      "runtimes": {
+        "train_s": 6137.432652950287,
+        "eval_s": 8.510757684707642
+      }
+    },
+    {
+      "unit": "lam_hi_d0.7_s4",
+      "reward_variant": "lam_hi",
+      "arena_density": 0.7,
+      "seed": 4,
+      "config_digest": "002da72fd99054228a8998176a4dcd1b152a80248c84d9407f38c7dbb1adb944",
+      "retention": {
+        "static": 0.37625,
+        "scripted": 0.543,
+        "policy": 0.51375
+      },
+      "retention_std": {
+        "static": 0.2613946967709942,
+        "scripted": 0.35118869571784345,
+        "policy": 0.3466730267846058
+      },
+      "beats_static": true,
+      "beats_scripted": false,
+      "runtimes": {
+        "train_s": 6144.183022975922,
+        "eval_s": 8.41377568244934
+      }
+    }
+  ]
+}

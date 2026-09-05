@@ -81,8 +81,8 @@ scored against both prey on the same held-out seeds (n = 80, seeds 1000–1079, 
 | PPO hunter | 51.3 ± 35.1 | 35.9 ± 31.3 | −15.4 | — |
 
 The comparison that carries weight is the **interaction**, paired by seed: the scripted hunter
-gives up 14.2 points less than the PPO hunter under the same evader, CI [+5.1, +23.9], and 15.2
-points less than the static camera, CI [+5.9, +24.7]. Per-arm intervals overlapping zero would
+gives up 14.2 points less than the PPO hunter under the same evader, CI [+4.9, +23.6], and 15.2
+points less than the static camera, CI [+5.8, +24.6]. Per-arm intervals overlapping zero would
 *not* have established this; the paired difference-in-differences does.
 
 **What the evader actually learned was to leave the frame, not to hide.** Against the two policies
@@ -106,8 +106,9 @@ Three caveats, all measured:
   not actively evading and realises 69 % of the speed cap, while the learned prey may use all of
   it. Part of the −16.4 and −15.4 is that handicap, not evasion skill.
 
-Full table and per-episode data: `reports/prey_trial.md`, `reports/eval_*.json`. Both policies
-in these tables are published under `models/` so every number can be recomputed.
+Full table and per-episode data: `reports/prey_trial.md`, `reports/evals/*.json`. Both policies
+are published under `models/`, and `uv run python scripts/audit_readme.py` re-checks every number
+in this file against those artifacts.
 
 ## How it works (7 packages, each standalone)
 
@@ -157,7 +158,7 @@ unaffected by light level.
   attempts") fired at 3 of 3, and its written default stands: the scripted hunter is the hero and
   the PPO result is reported as it is. It also degrades faster under pressure. Under the
   learned evader the PPO hunter gives up 14.2 points more than the scripted one (paired CI
-  [+5.1, +23.9]) — though see the three caveats on that trial above. Five local training runs (three of them
+  [+4.9, +23.6]) — though see the three caveats on that trial above. Five local training runs (three of them
   instrument-defective and diagnosed as such) and a 45-unit HPC sweep over seeds, reward
   variants and arena densities; the best PPO hunter ties the hand-written one. What PPO does
   buy is a faster reacquisition (1.70 vs 2.09 steps) at the same retention.
