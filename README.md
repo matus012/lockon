@@ -22,18 +22,18 @@ if some other track still overlaps — that is the whole point. Secondary: time-
 
 Every number below is regenerated from `reports/eval_*.json` by `scripts/readme_table.py`:
 
-| camera policy | lock retention % | ± std | 95 % CI of mean | Δ vs static (95 % CI) |
-|---|---|---|---|---|
-| static camera (floor) | 45.9 | 33.8 | [31.1, 60.8] | — |
-| scripted hunter (visibility-greedy) | 56.2 | 34.4 | [41.1, 71.3] | +10.2 [−2.5, +23.0] |
-| PPO hunter (best local checkpoint) | 53.2 | 36.7 | [37.1, 69.3] | +7.2 [−6.2, +20.7] |
+| camera policy | lock retention % | ± std | 95 % CI of mean | Δ vs static (95 % CI) | time-to-reacquire |
+|---|---|---|---|---|---|
+| static camera (floor) | 44.0 | 32.1 | [36.9, 51.0] | — | 1.66 |
+| scripted hunter (visibility-greedy) | 52.0 | 33.8 | [44.6, 59.4] | +8.0 [+2.3, +13.7] | 2.09 |
+| PPO hunter (best local checkpoint) | 51.3 | 35.1 | [43.6, 59.0] | +7.3 [+1.1, +13.5] | 1.70 |
 
-n = 20 episodes per arm, seeds 1000–1019 (held out from model selection), mid difficulty (every
-dial 0.5), tracker noise dial 0.3, per-episode noise seed. **These local gates are direction-only:**
-at n = 20 the paired CI is ±0.13–0.17, so "scripted ≈ PPO > static" is the honest reading, and
-resolving a 5-point gap needs ≈ 440 episodes per arm (paired, 80 % power). That is what the
-HPC seed × reward × arena array is for. The hero policy is therefore the **scripted hunter**;
-PPO is reported as it is.
+n = 80 episodes per arm, seeds 1000–1079 (held out from model selection), mid difficulty (every
+dial 0.5), tracker noise dial 0.3, per-episode noise seed. **Moving beats standing still:** both
+hunters clear the static floor by about 8 points with confidence intervals that exclude zero.
+**Learning does not beat the script:** scripted − PPO is +0.7 points, CI [−5.1, +6.5], so the two
+are indistinguishable and neither is better by more than ~6 points. The hero policy is therefore
+the **scripted hunter**; the PPO result is reported as it is.
 
 Degradation curves — retention vs occluder density · darkness · prey speed · prey aggressiveness
 · channel dropout, mean ± std over 20 episodes per point, one axis at a time with the others at
@@ -89,7 +89,10 @@ unaffected by light level.
   of view (row 9). Letting the policy observe the tracker's lock instead of geometry (row 12)
   made it worse on held-out seeds (row 13). Three local PPO designs; one passes the floor, none
   beats the scripted hunter.
-- **n = 20 cannot resolve the gaps it reports** (table above).
+- **The learned policy never beat the script.** Five local training runs (three of them
+  instrument-defective and diagnosed as such) and a 45-unit HPC sweep over seeds, reward
+  variants and arena densities; the best PPO hunter ties the hand-written one. What PPO does
+  buy is a faster reacquisition (1.70 vs 2.09 steps) at the same retention.
 
 ## Run it
 
