@@ -25,8 +25,10 @@ echo "=== GPU probe (waits for a slot)"
 wait_slot 3
 PROBE=$(q "cd ${R} && sbatch --parsable scripts/hpc/gpu_probe.sbatch" | tail -1)
 echo "probe job $PROBE"
-while true; do st=$(q "sacct -n -X -j ${PROBE} -o State | head -1" | tr -d ' '); case "$st" in COMPLETED|FAILED|TIMEOUT|CANCELLED*|NODE_FAIL|OUT_OF_MEMORY) break;; esac; sleep 60; done
-echo "probe state $st"
+# slurmdbd is unreachable on this cluster (sacct: "Connection refused"), so job completion is
+# detected by absence from squeue, never by sacct state (2026-09-05).
+while q "squeue -h -j ${PROBE} -o %i" | grep -q "${PROBE}"; do sleep 60; done
+echo "probe finished"
 q "cd ${R} && tail -20 runs/hpc/logs/lockon_gpu_probe_${PROBE}.out; tail -5 runs/hpc/logs/lockon_gpu_probe_${PROBE}.err"
 q "cd ${R} && grep -q 'GPU PROBE OK' runs/hpc/logs/lockon_gpu_probe_${PROBE}.out" || { echo "PROBE FAILED -- not submitting the trial"; exit 3; }
 

@@ -36,8 +36,9 @@ scp -o BatchMode=yes -q scripts/hpc/step9.sbatch "${HOST}:${R}/scripts/hpc/step9
 while [ "$(queued)" -gt 3 ]; do echo "$(date +%H:%M) waiting for a slot"; sleep 300; done
 JOB=$(q "cd ${R} && sbatch --parsable --export=ALL,BEST=${BEST} scripts/hpc/step9.sbatch" | tail -1)
 echo "step9 job $JOB"
-while true; do st=$(q "sacct -n -X -j ${JOB} -o State | head -1" | tr -d ' '); case "$st" in COMPLETED|FAILED|TIMEOUT|CANCELLED*|NODE_FAIL|OUT_OF_MEMORY) break;; esac; sleep 120; done
-echo "step9 state $st"; q "cd ${R} && tail -15 runs/hpc/logs/lockon_step9_${JOB}.out"
+# completion by absence from squeue (slurmdbd unreachable: sacct "Connection refused")
+while q "squeue -h -j ${JOB} -o %i" | grep -q "${JOB}"; do sleep 120; done
+echo "step9 finished"; q "cd ${R} && tail -15 runs/hpc/logs/lockon_step9_${JOB}.out"
 
 echo "=== 4 pull step-9 artifacts (small only)"
 mkdir -p runs/hpc_step9
