@@ -1,5 +1,6 @@
-STATUS: 7/12 — IN PROGRESS — PERUN: CPU array 82268 running 8-wide (45 units, ~1.7 h each, ETA ~10 h); learned-prey trial 82273 training on an H200 (device=cuda verified)
-RETENTION (n=80, held-out seeds 1000-1079, mid difficulty): static 44.0% · scripted 52.0% · ppo 51.3% — both hunters beat static (+8.0 [+2.3,+13.7] and +7.3 [+1.1,+13.5]); scripted - ppo = +0.7 [-5.1,+6.5] = indistinguishable
-HPC: 82268 array 0/45 done · ~0.05/70 GPU-h spent (prey trial <=19.5 running, step-9 renders <=2 queued)
+STATUS: 7/12 — IN PROGRESS — pushed to github.com/matus012/lockon (main @ aec096b, 140 files, no checkpoints/videos/runs); learned-prey trial DONE; CPU array 82268 at 8/45, ETA ~5 h
+RETENTION (n=80, held-out seeds 1000-1079, mid difficulty): static 44.0% · scripted 52.0% · ppo 51.3% — both hunters beat static (CIs exclude zero); scripted - ppo = +0.7 [-5.1,+6.5] = indistinguishable
+PREY TRIAL: vs the learned evader — static 27.6% (-16.4 [-25.0,-7.7]) · scripted 50.8% (-1.2 [-11.8,+9.5]) · ppo 35.9% (-15.4 [-25.1,-5.6]). The scripted hunter is the only policy it cannot degrade.
+HPC: 82268 array 8/45 · ~2.4/70 GPU-h spent (prey 2.3 + probe 0.05; step-9 renders <=2 to come)
 NEEDS YOU: none
 ppo_vs_scripted: 2 of 3 (attempt 3 = the HPC array, verdict at step 9 on seeds 1000-1079)
