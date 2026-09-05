@@ -35,6 +35,16 @@ Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doc
   `scripts/hpc/run_prey_replication.sh`, waits for the array then yields to step 9) run the
   corrected objective and must be reported as a separate attempt, never merged with attempt 1.
 - Repo is PUBLIC at github.com/matus012/lockon (main pushed; internal planning docs are in it).
+- **Step-10 rule, decided in advance so the artifacts stay consistent:** one PPO policy is used
+  everywhere in the README. If the HPC best unit's held-out retention (step9's
+  `eval_best_vs_scripted.json`, n=80 seeds 1000–1079) exceeds the local run-4 policy's 51.3 %,
+  then (a) regenerate the headline table from that JSON with `scripts/readme_table.py --json`,
+  (b) use step9's curves (`runs/hpc_step9/curves/*.png`) instead of the local ones, (c) replace
+  `models/ppo_hunter.zip` with the HPC checkpoint and update `models/README.md`. Otherwise keep
+  the local policy everywhere and report the array as a sweep that did not improve on it.
+  Either way the hero stays the scripted hunter unless the best unit BEATS it at n=80 — and if
+  it does not, plan §6's fork has fired at 3 of 3: report it with the default (scripted = hero,
+  PPO reported honestly) and continue, per §8. Do not stop for it.
 
 ## Architecture (plan §9 D1, D4)
 ```
