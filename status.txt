@@ -1,5 +1,5 @@
-STATUS: 7/12 — IN PROGRESS — PERUN: smoke OK; CPU array 82248 running (45 units, throttle 2, ~1 h/unit); GPU probe + learned-prey trial queued behind the site's 4-job cap (scripts/hpc/launch_gpu_trial.sh)
+STATUS: 7/12 — IN PROGRESS — CPU array 82268 running on PERUN (45 units, ~1.7 h each, throttle 2 to keep a GPU slot); GPU probe + learned-prey trial queued behind the site's 4-job cap
 RETENTION: static 45.9% · scripted 56.2% · ppo 53.2% (local, 20 episodes, held-out seeds 1000-1019)
-HPC: 82248 array 0/45 done · 0.0/70 GPU-h spent (planned ≤22: probe 0.25 + prey ≤19.5 + renders ≤2)
+HPC: 82268 array 0/45 done · 0.0/70 GPU-h spent (planned <=22: probe 0.25 + prey <=19.5 + renders <=2); CPU-h re-estimated 45 -> 90 from measurement (row 17)
 NEEDS YOU: none
 ppo_vs_scripted: 2 of 3 (attempt 3 = the HPC array, judged at n=80 held-out episodes at step 9)

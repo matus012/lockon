@@ -19,7 +19,7 @@ arena_densities: [0.3, 0.5, 0.7]
 # from the smoke job's wall time and update this value before submitting the array --
 # it is an input to scripts/hpc/sweep_common.py::budget_table, never a threshold that
 # moves to make a gate pass.
-est_h_per_unit: 1.0   # measured locally 2026-09-04: 6M steps at 2.9k steps/s on 8 laptop cores = 0.58 h; 1.0 h is the conservative unit estimate
+est_h_per_unit: 2.0   # MEASURED on cn08 2026-09-05: 3.2M of 6M steps in 53 min = ~1.7 h/unit (the 1.0 h estimate came from an 8-core laptop); wall = 2.0 x 1.35 margin (deviation row 17)
 
 total_steps: 6_000_000
 smoke_total_steps: 20_000
