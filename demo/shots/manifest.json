@@ -10,7 +10,7 @@
     "retention": 0.8833333333333333,
     "caption": "Person ducks behind a pillar, drone repositions, lock survives.",
     "file": "occlusion.mp4",
-    "git_head": "aa971c236ea81020cefddd26cf32414c625c51b7"
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f"
   },
   "lights_cut": {
     "scene": "lights_cut",
@@ -23,7 +23,7 @@
     "retention": 0.9814814814814815,
     "caption": "Lights cut: color view goes black, heat view takes over, lock survives.",
     "file": "lights_cut.mp4",
-    "git_head": "aa971c236ea81020cefddd26cf32414c625c51b7"
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f"
   },
   "chase": {
     "scene": "chase",
@@ -36,6 +36,6 @@
     "retention": 0.86,
     "caption": "The chase: hero hunter vs prey at mid difficulty, full run.",
     "file": "chase.mp4",
-    "git_head": "aa971c236ea81020cefddd26cf32414c625c51b7"
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f"
   }
 }

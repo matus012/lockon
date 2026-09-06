@@ -14,6 +14,30 @@ monitoring. Nothing here transfers to real hardware; it is a simulation study.
 Panels: colour · depth · thermal proxy, tracker box + id on every live channel, banner with lock
 state and running **lock retention %**, top-down minimap (green line = line of sight).
 
+## The reel
+
+Twelve clips and a captioned ~75 s cut, all rebuilt by one command
+(`uv run python -m lockon.demo.showcase`). Full index and caveats: **[demos/showcase](demos/showcase/README.md)**.
+
+| four arenas — dense | lights out — the thermal proxy carries it |
+|---|---|
+| ![dense](reports/gifs/showcase_scenario_dense.gif) | ![dark](reports/gifs/showcase_scenario_dark.gif) |
+| **static \| scripted \| PPO, one seed and clock** | **the evader, behaviour labelled per step** |
+| ![split](reports/gifs/showcase_split_dense.gif) | ![evader](reports/gifs/showcase_evader_reel.gif) |
+| **random-walk evader vs one trained to break the lock** | **rgb \| depth \| thermal through a lights-cut** |
+| ![pair](reports/gifs/showcase_pair_evader.gif) | ![sensors](reports/gifs/showcase_sensor_reel.gif) |
+
+Box colours follow the metric, not the eye: **green** = the target's first id, matched at
+IoU ≥ 0.5 (the only retained state); **amber** = that id is alive but unmatched — the tracker is
+coasting through an occlusion; **red** = a different id is on the target, which is exactly the
+failure the metric counts.
+
+Two before/after pairs were also measured over the 80 pre-registered held-out seeds rather than
+left as one anecdote each: training the PPO hunter is worth **+6.9 pts [+0.9, +13.0]** (an
+*untrained* PPO hunter scores 44.4 %, i.e. a static camera), while the published evader costs the
+scripted hunter only **+2.1 pts [−6.7, +10.8]** versus a person walking at random — no detectable
+difference, which independently reproduces why deviation-log row 20 exists.
+
 ## The one number: lock retention %
 
 `retention = steps on which the tracker outputs a track carrying the target's FIRST id with
@@ -187,6 +211,8 @@ uv run python -m lockon.harness.eval --policy scripted --vs static --n 20 --seed
 uv run python -m lockon.harness.sweep --config configs/sweep_local.yaml --workers 6
 uv run python -m lockon.harness.train --config configs/ppo_local.yaml --out runs/ppo_local
 uv run python -m lockon.demo.render_all --policy scripted && uv run python -m lockon.demo.viewer
+uv run python -m lockon.demo.showcase                    # demos/showcase: 12 clips + the cut
+uv run python scripts/showcase_pair_stats.py            # the two before/after pairs, n=80
 ```
 
 Windows 11 + GLFW offscreen rendering is the dev target; Linux uses EGL or OSMesa

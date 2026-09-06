@@ -26,6 +26,9 @@ DARK_SAMPLE_COUNT = 12
 DARK_SAMPLE_RADIUS_M = 6.0
 LOS_BREAK_GAIN = 1.0
 
+RANDOM_WALK_REHEADING_STEPS = 15
+RANDOM_WALK_STUCK_DIST_M = 0.1
+
 
 class ScriptedPrey:
     """Cover-seek + dark-seek + LOS-break, mixed by `Difficulty` (SPEC.md `Prey`)."""
@@ -155,3 +158,40 @@ class ScriptedPrey:
             if float(np.dot(perp_unit, nearest - person_xy)) < 0.0:
                 perp_unit = -perp_unit
         return perp_unit * (aggressiveness * LOS_BREAK_GAIN)
+
+
+class RandomWalkPrey:
+    """Ignores the drone entirely: walks a random heading at `person_max_speed`, re-drawing it
+    every `RANDOM_WALK_REHEADING_STEPS` steps or when pushed against a wall/pillar (little
+    movement since the last redraw). Deterministic from the `reset` seed."""
+
+    def __init__(self) -> None:
+        self.name = "random_walk"
+        self._difficulty: Difficulty | None = None
+        self._rng: np.random.Generator | None = None
+        self._heading = 0.0
+        self._last_xy = np.zeros(2, dtype=np.float64)
+        self._t = 0
+
+    def reset(self, layout: ArenaLayout, difficulty: Difficulty, seed: int) -> None:
+        self._difficulty = difficulty
+        self._rng = np.random.default_rng(seed)
+        self._heading = float(self._rng.uniform(-math.pi, math.pi))
+        self._last_xy = np.zeros(2, dtype=np.float64)
+        self._t = 0
+
+    def act(
+        self, state: WorldState, illumination: Callable[[npt.ArrayLike], float]
+    ) -> tuple[float, float]:
+        assert self._difficulty is not None and self._rng is not None
+        person_xy = np.array([state.person.x, state.person.y], dtype=np.float64)
+
+        stuck = self._t > 0 and float(np.linalg.norm(person_xy - self._last_xy)) < RANDOM_WALK_STUCK_DIST_M
+        if self._t == 0 or self._t % RANDOM_WALK_REHEADING_STEPS == 0 or stuck:
+            self._heading = float(self._rng.uniform(-math.pi, math.pi))
+
+        self._last_xy = person_xy
+        self._t += 1
+
+        speed = person_max_speed(self._difficulty)
+        return speed * math.cos(self._heading), speed * math.sin(self._heading)

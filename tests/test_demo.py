@@ -1,4 +1,4 @@
-"""Tests for `lockon.demo.render_all` and `lockon.demo.viewer` (SPEC.md `demo/SPEC.md`)."""
+"""Tests for `lockon.demo.render_all`, `lockon.demo.viewer` and `lockon.demo.showcase`."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from lockon.demo import render_all, viewer
+from lockon.demo import render_all, showcase, viewer
 
 
 @pytest.mark.render
@@ -52,3 +52,54 @@ def test_viewer_check(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
     (shots_dir / "chase.mp4").unlink()
     assert viewer.main(["--check"]) == 1
+
+
+@pytest.mark.render
+def test_showcase_sections_compose(tmp_path: Path) -> None:
+    """Every showcase section builds frames of a sane shape. Cheap: 6 steps, no mp4, no GIF."""
+    steps = 6
+    for name in ("scenario_open", "split_open", "evader_reel", "sensor_reel"):
+        frames = showcase._sections(steps, 10)[name][1]()  # type: ignore[operator]
+        assert len(frames) == steps, name
+        h, w, c = frames[0].shape
+        assert c == 3 and h > 200 and w > 400, (name, frames[0].shape)
+        # a composed frame is never uniformly blank: the HUD alone puts text on it
+        assert frames[-1].std() > 1.0, name
+
+
+@pytest.mark.render
+def test_showcase_cli_writes_mp4_and_manifest(tmp_path: Path) -> None:
+    rc = showcase.main(
+        ["--out", str(tmp_path), "--only", "scenario_open", "--steps", "6", "--no-gifs"]
+    )
+    assert rc == 0
+    assert (tmp_path / "scenario_open.mp4").stat().st_size > 10_000
+    entry = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))["scenario_open"]
+    assert entry["frames"] == 6
+    assert entry["git_head"]
+
+
+def test_showcase_behaviour_labels_are_exhaustive() -> None:
+    """Every label the evader reel can print is one of the documented set.
+
+    Run a real episode and label every step: a new branch in `_behaviour` that forgets to use one
+    of the documented strings fails here rather than shipping an unexplained caption.
+    """
+    from lockon.core.schemas import Difficulty
+    from lockon.harness.episode import resolve_hunter, run_episode
+    from lockon.harness.eval import resolve_prey
+
+    known = {
+        "OUT OF FRAME",
+        "BREAKING LINE OF SIGHT",
+        "RUNNING INTO THE DARK",
+        "HUGGING COVER",
+        "OPENING THE GAP",
+        "IN THE OPEN",
+    }
+    result = run_episode(
+        Difficulty(), 101, resolve_hunter("scripted"), resolve_prey("scripted"), steps=40
+    )
+    seen = {showcase._behaviour(result, i)[0] for i in range(len(result.states))}
+    assert seen, "no steps labelled"
+    assert seen <= known, seen - known

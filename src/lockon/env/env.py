@@ -65,9 +65,12 @@ class Env:
     PERSON_BODY: str = "person"
     DRONE_BODY: str = "drone"
 
-    def __init__(self, difficulty: Difficulty, seed: int, half_size: float = 12.0) -> None:
+    def __init__(
+        self, difficulty: Difficulty, seed: int, half_size: float = 12.0, layout_style: str = "random"
+    ) -> None:
         self.difficulty = difficulty
         self.half_size = half_size
+        self.layout_style = layout_style
         self.layout: ArenaLayout
         self.model: mujoco.MjModel
         self.data: mujoco.MjData
@@ -95,7 +98,9 @@ class Env:
             # dropout gets its own stream so the schedule does not shift with the number of
             # pillar rejection draws when occluder_density changes (review finding 7)
             self._dropout_rng = np.random.default_rng([seed, 0x5D5D])
-            self.layout = arena.build_layout(self.difficulty, self._rng, self.half_size)
+            self.layout = arena.build_layout(
+                self.difficulty, self._rng, self.half_size, style=self.layout_style
+            )
             mjcf = arena.build_mjcf(self.layout)
             self.model = mujoco.MjModel.from_xml_string(mjcf)
             self.data = mujoco.MjData(self.model)

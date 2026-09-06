@@ -20,6 +20,7 @@ from lockon.core.schemas import (
     EPISODE_STEPS,
     AgentAction,
     AgentObs,
+    ArenaLayout,
     Detection,
     Difficulty,
     FloatArray,
@@ -61,6 +62,7 @@ class EpisodeResult:
     retention: RetentionResult
     loss_causes: list[str]
     frames: list[SensorFrame] | None
+    layout: ArenaLayout
 
 
 def resolve_hunter(name_or_path: str) -> Hunter:
@@ -150,8 +152,9 @@ def run_episode(
     scene: Scene | None = None,
     capture: bool = False,
     noise: NoiseConfig | None = None,
+    layout_style: str = "random",
 ) -> EpisodeResult:
-    env = Env(difficulty, seed)
+    env = Env(difficulty, seed, layout_style=layout_style)
     layout = env.layout
     hunter.reset(layout, seed)
     prey.reset(layout, difficulty, seed)
@@ -225,4 +228,5 @@ def run_episode(
         retention=result,
         loss_causes=loss_causes,
         frames=frames,
+        layout=env.layout,
     )

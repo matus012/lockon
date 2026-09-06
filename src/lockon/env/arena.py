@@ -8,7 +8,14 @@ import math
 
 import numpy as np
 
-from lockon.core.schemas import IMAGE_HEIGHT, IMAGE_WIDTH, PERSON_MATERIAL, ArenaLayout, Difficulty
+from lockon.core.schemas import (
+    IMAGE_HEIGHT,
+    IMAGE_WIDTH,
+    PERSON_MATERIAL,
+    ArenaLayout,
+    Difficulty,
+    FloatArray,
+)
 
 WALL_MARGIN_M: float = 1.5
 # camera-attached fill light so the rgb channel reads as a normal camera at darkness 0;
@@ -18,6 +25,14 @@ HEADLIGHT_DIFFUSE: float = 0.25
 CENTER_CLEARANCE_M: float = 2.5
 PILLAR_HEIGHT_M: float = 3.5
 N_LIGHTS: int = 6
+
+# Corridor layout (style="corridor"): two parallel rows of pillars along y, at x = +/- CORRIDOR_X_M,
+# leaving a ~2 * CORRIDOR_X_M lane down the middle.
+CORRIDOR_X_M: float = 3.0
+CORRIDOR_PILLAR_HALF_WIDTH_M: float = 0.9
+CORRIDOR_SPACING_Y_M: float = 2.6
+CORRIDOR_JITTER_X_M: float = 0.15
+CORRIDOR_JITTER_Y_M: float = 0.2
 DRONE_ALTITUDE_M: float = 3.0
 LIGHT_HEIGHT_M: float = 3.0
 CAMERA_PITCH_DEG: float = 25.0
@@ -58,8 +73,8 @@ PERSON_AABB_Z_LO: float = min(p[3] for p in PERSON_PARTS)  # 0.03
 PERSON_AABB_Z_HI: float = max(p[4] for p in PERSON_PARTS)  # 1.70
 
 
-def build_layout(difficulty: Difficulty, rng: np.random.Generator, half_size: float) -> ArenaLayout:
-    """Rejection-sampled pillars + uniform lights (SPEC.md `Arena`)."""
+def _build_random_pillars(difficulty: Difficulty, rng: np.random.Generator, half_size: float) -> FloatArray:
+    """Original rejection-sampled pillar placement (unchanged code path)."""
     m = round(4 + 20 * difficulty.occluder_density)
     pillars: list[tuple[float, float, float]] = []
     max_tries = 300
@@ -77,7 +92,42 @@ def build_layout(difficulty: Difficulty, rng: np.random.Generator, half_size: fl
                 continue
             pillars.append((x, y, hw))
             break
-    pillars_arr = np.array(pillars, dtype=np.float64).reshape(-1, 3) if pillars else np.zeros((0, 3))
+    return np.array(pillars, dtype=np.float64).reshape(-1, 3) if pillars else np.zeros((0, 3))
+
+
+def _build_corridor_pillars(rng: np.random.Generator, half_size: float) -> FloatArray:
+    """Deterministic two-row corridor: rows at x = +/- CORRIDOR_X_M, spanning y with small jitter.
+    Jitter is bounded well inside the lane (CORRIDOR_X_M - hw - jitter_x >> 0), so it never closes
+    the ~2*CORRIDOR_X_M lane down the middle.
+    """
+    hw = CORRIDOR_PILLAR_HALF_WIDTH_M
+    y_bound = half_size - WALL_MARGIN_M - hw
+    pillars: list[tuple[float, float, float]] = []
+    if y_bound > 0:
+        n = int(math.floor(2 * y_bound / CORRIDOR_SPACING_Y_M)) + 1
+        ys = np.linspace(-y_bound, y_bound, n) if n > 1 else np.array([0.0])
+        for row_x in (-CORRIDOR_X_M, CORRIDOR_X_M):
+            for y in ys:
+                jx = float(rng.uniform(-CORRIDOR_JITTER_X_M, CORRIDOR_JITTER_X_M))
+                jy = float(rng.uniform(-CORRIDOR_JITTER_Y_M, CORRIDOR_JITTER_Y_M))
+                pillars.append((row_x + jx, float(y) + jy, hw))
+    return np.array(pillars, dtype=np.float64).reshape(-1, 3) if pillars else np.zeros((0, 3))
+
+
+def build_layout(
+    difficulty: Difficulty, rng: np.random.Generator, half_size: float, style: str = "random"
+) -> ArenaLayout:
+    """Rejection-sampled pillars + uniform lights (SPEC.md `Arena`).
+
+    `style="random"` is the original path, unchanged. `style="corridor"` instead returns a
+    deterministic two-row corridor (see `_build_corridor_pillars`).
+    """
+    if style == "random":
+        pillars_arr = _build_random_pillars(difficulty, rng, half_size)
+    elif style == "corridor":
+        pillars_arr = _build_corridor_pillars(rng, half_size)
+    else:
+        raise ValueError(f"unknown arena style: {style!r}")
 
     lights = np.empty((N_LIGHTS, 3), dtype=np.float64)
     for i in range(N_LIGHTS):

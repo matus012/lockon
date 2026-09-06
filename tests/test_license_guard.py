@@ -48,7 +48,17 @@ ALLOWED_TRACKED_VISUALS: dict[str, str] = {
     "reports/curves/prey_aggressiveness.png": "plot",
     "reports/curves/channel_dropout.png": "plot",
     "reports/curves/hpc_best_summary.png": "plot",
+    # showcase reel (demos/showcase). The mp4s stay untracked and are reproducible from
+    # `python -m lockon.demo.showcase`; only these README-table GIFs are committed.
+    "reports/gifs/showcase_scenario_dense.gif": "sim-render",
+    "reports/gifs/showcase_scenario_dark.gif": "sim-render",
+    "reports/gifs/showcase_split_dense.gif": "sim-render",
+    "reports/gifs/showcase_pair_evader.gif": "sim-render",
+    "reports/gifs/showcase_evader_reel.gif": "sim-render",
+    "reports/gifs/showcase_sensor_reel.gif": "sim-render",
 }
+
+GIF_CEILING = 10 * 1024 * 1024  # the owner's line: no committed mp4/GIF over 10 MB
 
 
 def _tracked() -> list[str]:
@@ -91,6 +101,17 @@ def test_tracked_visuals_are_allowlisted(tracked: list[str]) -> None:
     visuals = [p for p in tracked if Path(p).suffix.lower() in VISUAL_EXT]
     bad = [p for p in visuals if p not in ALLOWED_TRACKED_VISUALS]
     assert not bad, f"unclassified tracked visuals: {bad}"
+
+
+def test_allowlisted_visuals_are_under_the_gif_ceiling(tracked: list[str]) -> None:
+    """No committed visual over 10 MB — the allowlist is the only path past `.gitignore`, so the
+    ceiling has to be asserted here or it is not asserted anywhere."""
+    big = []
+    for path in ALLOWED_TRACKED_VISUALS:
+        f = ROOT / path
+        if f.exists() and f.stat().st_size > GIF_CEILING:
+            big.append((path, f.stat().st_size))
+    assert not big, big
 
 
 def test_allowlist_is_clean() -> None:

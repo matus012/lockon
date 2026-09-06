@@ -21,7 +21,7 @@ import numpy as np
 from lockon.core.schemas import Difficulty
 from lockon.harness.episode import resolve_hunter, run_episode
 from lockon.policy.base import Prey
-from lockon.policy.prey import ScriptedPrey
+from lockon.policy.prey import RandomWalkPrey, ScriptedPrey
 from lockon.policy.prey_learned import LearnedPrey
 
 logger = logging.getLogger(__name__)
@@ -36,9 +36,12 @@ _DIFFICULTY_FIELDS = (
 
 
 def resolve_prey(name_or_path: str) -> Prey:
-    """`scripted` (default) -> `ScriptedPrey()`, anything else -> `LearnedPrey(path)` (SPEC_prey.md)."""
+    """`scripted` (default) -> `ScriptedPrey()`, `random` -> `RandomWalkPrey()` (the showcase's
+    before/after baseline), anything else -> `LearnedPrey(path)` (SPEC_prey.md)."""
     if name_or_path == "scripted":
         return ScriptedPrey()
+    if name_or_path == "random":
+        return RandomWalkPrey()
     return LearnedPrey(name_or_path)
 
 

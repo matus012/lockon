@@ -6,7 +6,12 @@ graph, §3 gates) → 4. `project.md` only when a decision is questioned (it is 
 Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doctrines.md`.
 
 ## Position
-- **Step 7 of 12 — HPC running** (2026-09-05, owner approved the launch).
+- **Step 11 of 12 — owner review; showcase upgrade delivered** (2026-09-06). Steps 1-10 complete,
+  all HPC work finished and the queue empty (74 CPU-h + 7.5 of 70 GPU-h). The public repo is
+  github.com/matus012/lockon. This session added `demos/showcase/` (12 clips + a captioned cut,
+  render-only, `python -m lockon.demo.showcase`) and the two before/after pairs measured at n=80
+  (`scripts/showcase_pair_stats.py` -> `reports/evals/showcase_pairs.json`).
+- Historical (step 7, kept because the PERUN facts below are still the cold-resume record):
 - PERUN facts (all verified this session): SSH `login02.perun.tuke.sk` (user in ~/.ssh/config, key in
   ~/.ssh); repo `/mnt/project/perun26011488/lockon/repo` (runs/ stay there — data gravity);
   venvs `.venv` (CPU torch) + `.venv_gpu` (cu126) built ONLINE on the login node
@@ -108,4 +113,5 @@ type status.txt ; git log --oneline -5 ; uv run python scripts/check_gates.py --
 Then open plan.md §5 at the step named in status.txt and continue from the first unmet gate.
 
 ## Open items / blockers
-None. `reports/blockers.md` is empty. Deviation log has 6 rows (all gate-semantics **no**).
+None. `reports/blockers.md` is empty. Deviation log has 26 rows (all gate-semantics **no**).
+Next decision is the owner's: plan §5 step 11 — ship / fix / +300 GPU-h.

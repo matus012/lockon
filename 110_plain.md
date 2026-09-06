@@ -34,6 +34,26 @@ problem, not transferring to real robots.
 2. Lights cut → color view goes black → heat view takes over → lock survives.
 3. The chase: smart hunter vs hard prey, full run.
 
+## The full showcase reel (`demos/showcase/`, built after the results were in)
+Twelve clips plus a captioned 60–90 s cut, all rendered from policies that already exist —
+nothing here is trained and nothing here produces a published number.
+- **Four arenas**, 30 s each: open (4 pillars), dense (24 pillars), corridor (two pillar rows and
+  one lane), and lights-out.
+- **Three hunters at once**: fixed camera | rule-based hunter | learned hunter, on the same seed
+  and the same clock, each panel carrying its own live lock state and retention counter. The
+  person reacts to whichever drone it is facing, so the three worlds drift apart — that is
+  physics, not a rendering trick, and the clip says so.
+- **Before and after**: an untrained learned hunter beside the trained one, and a person who just
+  wanders beside one trained to break the lock.
+- **The evader alone**, with what it is doing labelled each step (breaking line of sight, hugging
+  cover, running into the dark) — labels read off the simulator's own state, never guessed.
+- **The senses**: color, depth and heat side by side through a lights-cut, with each one flagged
+  alive / blind / dropped out.
+
+Every clip prints the difficulty dials it ran at and a line saying its retention counter is one
+episode, not the headline. Rebuild the whole reel with one command:
+`uv run python -m lockon.demo.showcase`.
+
 ## Where things come from
 - Simulator, tracker, learning library, viewer: all free and open (Apache/MIT).
 - Training data: none needed. The simulator generates its own games; the hunter learns from playing.

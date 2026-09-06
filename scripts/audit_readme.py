@@ -86,6 +86,21 @@ def main() -> int:
     chk("sweep scripted held out", s9["scripted"].mean() * 100, 52.0)
     chk("sweep static held out", s9["static"].mean() * 100, 44.0)
 
+    # 4. the showcase's two before/after pairs (scripts/showcase_pair_stats.py)
+    pairs_f = ROOT / "reports/evals/showcase_pairs.json"
+    if pairs_f.exists():
+        pairs = json.loads(pairs_f.read_text(encoding="utf-8"))
+        hp, ep = pairs["hunter_pair"], pairs["evader_pair"]
+        chk("pair: untrained PPO hunter", hp["a_mean_pct"], 44.4)
+        chk("pair: trained PPO hunter", hp["b_mean_pct"], 51.3)
+        chk("pair: hunter training delta", -hp["delta_pct"], 6.9)
+        chk("pair: hunter CI lo", -hp["ci_hi"], 0.9)
+        chk("pair: hunter CI hi", -hp["ci_lo"], 13.0)
+        chk("pair: scripted vs random-walk evader", ep["a_mean_pct"], 52.9)
+        chk("pair: evader delta", ep["delta_pct"], 2.1)
+        chk("pair: evader CI lo", ep["ci_lo"], -6.7)
+        chk("pair: evader CI hi", ep["ci_hi"], 10.8)
+
     means = [c["mean"] * 100 for c in arr["ablation"]]
     chk("ablation min", min(means), 50.3)
     chk("ablation max", max(means), 52.5)

@@ -170,3 +170,42 @@ def test_drone_commands_are_low_pass_filtered() -> None:
     e.reset()
     assert float(np.abs(e._drone_cmd).max()) == 0.0
 
+
+# 8. arena layout style ---------------------------------------------------------------------
+def test_arena_style_random_unchanged_for_fixed_seed() -> None:
+    """`style="random"` (the default) must take exactly the pre-existing code path."""
+    from lockon.env import arena as arena_mod
+
+    rng_default = np.random.default_rng(9)
+    rng_explicit = np.random.default_rng(9)
+    layout_default = arena_mod.build_layout(Difficulty(), rng_default, half_size=12.0)
+    layout_explicit = arena_mod.build_layout(Difficulty(), rng_explicit, half_size=12.0, style="random")
+    np.testing.assert_array_equal(layout_default.pillars, layout_explicit.pillars)
+    np.testing.assert_array_equal(layout_default.lights, layout_explicit.lights)
+
+
+def test_arena_style_corridor_produces_two_x_clusters() -> None:
+    from lockon.env import arena as arena_mod
+
+    rng = np.random.default_rng(3)
+    layout = arena_mod.build_layout(Difficulty(), rng, half_size=12.0, style="corridor")
+    assert layout.pillars.shape[0] > 0
+    xs = layout.pillars[:, 0]
+    near_neg = np.abs(xs - (-arena_mod.CORRIDOR_X_M)) < (
+        arena_mod.CORRIDOR_JITTER_X_M + 1e-6
+    )
+    near_pos = np.abs(xs - arena_mod.CORRIDOR_X_M) < (arena_mod.CORRIDOR_JITTER_X_M + 1e-6)
+    assert bool(np.all(near_neg | near_pos))
+    assert bool(np.any(near_neg))
+    assert bool(np.any(near_pos))
+    # the lane down the middle must stay open: no pillar half-width reaches the centre
+    assert float(np.min(np.abs(xs))) > 1.0
+
+
+def test_arena_style_unknown_raises() -> None:
+    from lockon.env import arena as arena_mod
+
+    rng = np.random.default_rng(1)
+    with pytest.raises(ValueError):
+        arena_mod.build_layout(Difficulty(), rng, half_size=12.0, style="bogus")
+
