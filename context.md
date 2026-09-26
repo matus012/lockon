@@ -6,7 +6,9 @@ graph, §3 gates) → 4. `project.md` only when a decision is questioned (it is 
 Execution law: `../000_infra/refactored_method.md`. Doctrines: `../000_infra/doctrines.md`.
 
 ## Position
-- **Step 11 of 12 — owner review; showcase upgrade delivered** (2026-09-06). Steps 1-10 complete,
+- **CLOSED 2026-09-26 — shipped as-is, v1.0.** Owner ruled step 11 = ship (no fix, no +300 GPU-h),
+  step 12 = already public. GPU-h reconciled to 7.53 (5 jobs; see status.txt HPC line).
+- Previously: **Step 11 of 12 — owner review; showcase upgrade delivered** (2026-09-06). Steps 1-10 complete,
   all HPC work finished and the queue empty (74 CPU-h + 7.5 of 70 GPU-h). The public repo is
   github.com/matus012/lockon. This session added `demos/showcase/` (12 clips + a captioned cut,
   render-only, `python -m lockon.demo.showcase`) and the two before/after pairs measured at n=80

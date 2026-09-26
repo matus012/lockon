@@ -197,6 +197,10 @@ Everything demo-facing runs on a laptop; the cluster work is a sweep, not a requ
 | TUKE PERUN, cpu_short | 45-unit sweep: 5 seeds × 3 reward variants × 3 arena densities, 6M steps each | ~74 CPU-h, 0 GPU-h |
 | TUKE PERUN, gpu_short (H200) | three learned-prey trials (20M steps each) + the step-9 verdict, curves and clips | **7.5 GPU-h total**, ~8k env steps/s |
 
+GPU-h by job (5 H200 jobs, from the PERUN job logs): probe 0.03 · three learned-prey runs
+2.2 / 2.3 / 2.15 · step-9 verdict + curves + clips 0.85 = 7.53. An earlier 9.4 figure was a
+pre-measurement estimate and is superseded. The CPU figure is job wall-hours (8 cores each).
+
 State-only PPO is CPU-optimal (a two-layer MLP over a 26-dim observation), so the array asks for
 no GPU at all. The GPU earns its place on the prey trial's throughput and on EGL offscreen
 rendering. Reproduce the cluster side with `HPC_RUNBOOK.md`; the job scripts are emitted from
@@ -218,6 +222,15 @@ uv run python scripts/showcase_pair_stats.py            # the two before/after p
 Windows 11 + GLFW offscreen rendering is the dev target; Linux uses EGL or OSMesa
 (`MUJOCO_GL`). State-only PPO trains on CPU by design (~2.9k env steps/s on a laptop; 6M steps
 ≈ 35 min). The sweep is memory-bound: keep `--workers` ≤ 6 on 16 GB.
+
+## Known gaps
+
+Shipped as-is (v1.0, 2026-09-26); these are recorded, not planned:
+
+- **No watts in the edge table.** Compute is reported as throughput and GPU-/CPU-hours only; power
+  draw was never measured.
+- **No `docs/concept.md`.** The concept lives in this README, `plan.md` and `project.md`; no
+  standalone concept document was written.
 
 ## Licences
 

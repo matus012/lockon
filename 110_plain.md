@@ -89,3 +89,9 @@ Total your time: ~3 h over 4–5 days. Everything else runs unattended.
 - It runs until a gate passes or a fallback fires — both are automatic. It stops for you ONLY on:
   approval-list items (public / money / delete), a fallback that also failed, or a decision that
   changes what the demo is. Everything else it resolves itself and logs.
+
+## Final state (2026-09-26)
+Shipped and closed as v1.0. The hand-written hunter stayed the hero: no learned policy beat it, and
+the repo says so. Cluster cost: 7.5 GPU-hours and ~74 CPU job-hours on TUKE PERUN. Two things were
+never done and are listed as known gaps: power (watts) was never measured, and there is no separate
+concept document. No further work is planned.
