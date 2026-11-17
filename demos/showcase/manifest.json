@@ -1,0 +1,131 @@
+{
+  "evader_reel": {
+    "caption": "the trained evader, behaviour labelled per step",
+    "file": "evader_reel.mp4",
+    "fps": 10,
+    "frames": 300,
+    "gif": "reports/gifs/showcase_evader_reel.gif",
+    "gif_mb": 3.12,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 8.9
+  },
+  "pair_evader": {
+    "caption": "before / after: a random-walk evader beside one trained to break the lock",
+    "file": "pair_evader.mp4",
+    "fps": 10,
+    "frames": 300,
+    "gif": "reports/gifs/showcase_pair_evader.gif",
+    "gif_mb": 3.23,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 4.56
+  },
+  "pair_hunter": {
+    "caption": "before / after: an untrained PPO hunter beside the trained one",
+    "file": "pair_hunter.mp4",
+    "fps": 10,
+    "frames": 300,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 3.73
+  },
+  "scenario_corridor": {
+    "caption": "corridor arena, scripted hunter: Two pillar rows, one lane. Repeated brief occlusions, fixed geometry.",
+    "file": "scenario_corridor.mp4",
+    "fps": 10,
+    "frames": 300,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 7.04
+  },
+  "scenario_dark": {
+    "caption": "dark arena, scripted hunter: Lights out. The colour channel is blind; the thermal proxy carries the lock.",
+    "file": "scenario_dark.mp4",
+    "fps": 10,
+    "frames": 300,
+    "gif": "reports/gifs/showcase_scenario_dark.gif",
+    "gif_mb": 3.7,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 6.72
+  },
+  "scenario_dense": {
+    "caption": "dense arena, scripted hunter: 24 pillars. Cover everywhere - occlusion dominates the loss causes.",
+    "file": "scenario_dense.mp4",
+    "fps": 10,
+    "frames": 300,
+    "gif": "reports/gifs/showcase_scenario_dense.gif",
+    "gif_mb": 3.11,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 7.63
+  },
+  "scenario_open": {
+    "caption": "open arena, scripted hunter: Open arena, 4 pillars. Almost nothing to hide behind.",
+    "file": "scenario_open.mp4",
+    "fps": 10,
+    "frames": 300,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 7.24
+  },
+  "sensor_reel": {
+    "caption": "rgb | depth | thermal through a lights-cut, with dropout flags",
+    "file": "sensor_reel.mp4",
+    "fps": 10,
+    "frames": 300,
+    "gif": "reports/gifs/showcase_sensor_reel.gif",
+    "gif_mb": 3.32,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 9.72
+  },
+  "sizzle": {
+    "caption": "the captioned cut of everything above",
+    "file": "sizzle.mp4",
+    "fps": 10,
+    "frames": 715,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 71.5,
+    "size_mb": 10.27
+  },
+  "split_corridor": {
+    "caption": "corridor arena: static | scripted | PPO on one seed and clock",
+    "file": "split_corridor.mp4",
+    "fps": 10,
+    "frames": 300,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 1.32
+  },
+  "split_dark": {
+    "caption": "dark arena: static | scripted | PPO on one seed and clock",
+    "file": "split_dark.mp4",
+    "fps": 10,
+    "frames": 300,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 3.89
+  },
+  "split_dense": {
+    "caption": "dense arena: static | scripted | PPO on one seed and clock",
+    "file": "split_dense.mp4",
+    "fps": 10,
+    "frames": 300,
+    "gif": "reports/gifs/showcase_split_dense.gif",
+    "gif_mb": 4.12,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 1.43
+  },
+  "split_open": {
+    "caption": "open arena: static | scripted | PPO on one seed and clock",
+    "file": "split_open.mp4",
+    "fps": 10,
+    "frames": 300,
+    "git_head": "d799610cbde15789f68e92fbb20cc32ef44b1d8f",
+    "seconds": 30.0,
+    "size_mb": 1.41
+  }
+}
