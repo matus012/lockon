@@ -1,242 +1,220 @@
-# lockon — active perception under degradation
+# lockon
 
-A simulated drone camera that **moves to keep lock on a person who is actively hiding** — behind
-pillars, in the dark, when a sensor dies. Everything runs inside a MuJoCo arena the repo owns: no
-real footage, no datasets, no learned detector. The demo is the product.
+**A simulated drone camera that moves to keep a person in view while that person tries to hide** — behind
+pillars, in the dark, or when one of its sensors dies. Everything runs in a small MuJoCo arena: no real
+footage, no datasets, no learned detector.
 
-Use cases this is built for: drone safety, search and rescue, autonomous filming, wildlife
-monitoring. Nothing here transfers to real hardware; it is a simulation study.
+<a href="https://github.com/matus012/lockon/releases/download/v1.0/scenario_dense.mp4"><img src="reports/gifs/hero_dense.gif" width="640" alt="One episode in the densest arena: the camera holds lock on the person (green box) for about 10 seconds, the person slips behind pillars and the lock is lost, and when they reappear the tracker puts a different id on them (red box)"></a>
 
-| Person ducks behind a pillar → the camera repositions → lock survives | Lights cut → the colour channel goes to noise → the thermal proxy takes over |
-|---|---|
-| ![occlusion](reports/gifs/occlusion_lock.gif) | ![lights cut](reports/gifs/lights_cut_lock.gif) |
+<sub>One episode, densest arena (24 pillars), hand-written camera policy, the showcase's fixed seed 101 — first 15 s,
+click to download the full 30 s mp4. Lock is held (**green**) for ~10 s, then the person slips behind pillars and
+the lock is lost; at ~14 s they reappear with a **different** id (**red**) — exactly the failure the score counts.
+An illustration, not the result: over 80 held-out episodes this camera keeps lock 52 % of the time.</sub>
 
-Panels: colour · depth · thermal proxy, tracker box + id on every live channel, banner with lock
-state and running **lock retention %**, top-down minimap (green line = line of sight).
+- **What it does:** a camera policy steers the drone so a multi-object tracker (ByteTrack) keeps the person's
+  *original* track id. The score is **lock retention** — the share of time steps on which that id sits on the person.
+- **Headline result:** a moving camera keeps the person locked **52 %** of the time vs **44 %** for a fixed camera
+  (about 18 % better, 80 held-out episodes). A policy trained with reinforcement learning (51 %) did **not** beat
+  the hand-written one.
+- **How (built end to end):** physics arena, three-channel sensor model, tracker integration, reinforcement-learning
+  training including a 45-run sweep on a university GPU cluster, and a learned evader that tries to break the lock.
 
-## The reel
+**Links:** [70 s captioned reel (mp4)](https://github.com/matus012/lockon/releases/download/v1.0/sizzle.mp4) ·
+[all clips (Release v1.0)](https://github.com/matus012/lockon/releases/tag/v1.0) ·
+[how to read the clips](demos/showcase/README.md) · [published policies](models/README.md)
 
-Twelve clips and a captioned ~75 s cut, all rebuilt by one command
-(`uv run python -m lockon.demo.showcase`). Full index and caveats: **[demos/showcase](demos/showcase/README.md)**.
+**Key terms.** A multi-object *tracker* gives every box it sees an id number; **lock** = the id first given to the
+person is still on the person (overlap IoU ≥ 0.5 with the true box), checked every time step. *ByteTrack*: a standard
+tracker. *PPO*: a reinforcement-learning algorithm. *Scripted hunter*: a hand-written rule that steers the camera to
+keep the person in view. *Held-out episodes*: random seeds never used while choosing or tuning a policy.
+*Coasting*: the tracker keeps a lost id alive for a while, predicting where it went.
 
-| four arenas — dense | lights out — the thermal proxy carries it |
-|---|---|
-| ![dense](reports/gifs/showcase_scenario_dense.gif) | ![dark](reports/gifs/showcase_scenario_dark.gif) |
-| **static \| scripted \| PPO, one seed and clock** | **the evader, behaviour labelled per step** |
-| ![split](reports/gifs/showcase_split_dense.gif) | ![evader](reports/gifs/showcase_evader_reel.gif) |
-| **random-walk evader vs one trained to break the lock** | **rgb \| depth \| thermal through a lights-cut** |
-| ![pair](reports/gifs/showcase_pair_evader.gif) | ![sensors](reports/gifs/showcase_sensor_reel.gif) |
+## Results
 
-Box colours follow the metric, not the eye: **green** = the target's first id, matched at
-IoU ≥ 0.5 (the only retained state); **amber** = that id is alive but unmatched — the tracker is
-coasting through an occlusion; **red** = a different id is on the target, which is exactly the
-failure the metric counts.
+Mean lock retention over 80 held-out episodes (seeds 1000–1079), medium difficulty; 95 % CIs are normal
+intervals of the mean, and differences are paired per seed. Source: [`reports/eval_n80_ppo_vs_scripted.json`](reports/eval_n80_ppo_vs_scripted.json), table
+printed by [`scripts/readme_table.py`](scripts/readme_table.py).
 
-Two before/after pairs were also measured over the 80 pre-registered held-out seeds rather than
-left as one anecdote each: training the PPO hunter is worth **+6.9 pts [+0.9, +13.0]** (an
-*untrained* PPO hunter scores 44.4 %, i.e. a static camera), while the published evader costs the
-scripted hunter only **+2.1 pts [−6.7, +10.8]** versus a person walking at random — no detectable
-difference, which independently reproduces why deviation-log row 20 exists.
-
-## The one number: lock retention %
-
-`retention = steps on which the tracker outputs a track carrying the target's FIRST id with
-IoU ≥ 0.5 to the true box ÷ episode steps` (`lockon.core.metrics`). An id switch is a loss even
-if some other track still overlaps — that is the whole point. Secondary: time-to-reacquire.
-
-Every number below is regenerated from `reports/eval_*.json` by `scripts/readme_table.py`:
-
-| camera policy | lock retention % | ± std | 95 % CI of mean | Δ vs static (95 % CI) | time-to-reacquire |
-|---|---|---|---|---|---|
-| static camera (floor) | 44.0 | 32.1 | [36.9, 51.0] | — | 1.66 |
-| scripted hunter (visibility-greedy) | 52.0 | 33.8 | [44.6, 59.4] | +8.0 [+2.3, +13.7] | 2.09 |
-| PPO hunter (best local checkpoint) | 51.3 | 35.1 | [43.6, 59.0] | +7.3 [+1.1, +13.5] | 1.70 |
-
-n = 80 episodes per arm, seeds 1000–1079 (held out from model selection), mid difficulty (every
-dial 0.5), tracker noise dial 0.3, per-episode noise seed. **Moving beats standing still:** both
-hunters clear the static floor by about 8 points with confidence intervals that exclude zero.
-**Learning does not beat the script:** scripted − PPO is +0.7 points, CI [−5.1, +6.5], so the two
-are indistinguishable and neither is better by more than ~6 points. The hero policy is therefore
-the **scripted hunter**; the PPO result is reported as it is.
-
-Degradation curves — retention vs occluder density · darkness · prey speed · prey aggressiveness
-· channel dropout, mean ± std over 20 episodes per point, one axis at a time with the others at
-0.5 — from one command (`python -m lockon.harness.sweep --config configs/sweep_local.yaml`):
-
-![curves](reports/curves/summary.png)
-
-`reports/sweep/failure_report.md` names the worst point and the dominant loss cause per axis. Across
-all 1,500 sweep episodes every lock loss is attributed to occlusion or field-of-view, never to
-darkness or channel dropout: with a dark-immune thermal proxy and at most one dead channel at a
-time, those two axes cannot break lock on their own (a design statement, now also a measurement).
-
-## What a 45-unit sweep bought (PERUN, cpu_short)
-
-Five seeds × three reward variants × three arena densities, 6M steps each, ~74 CPU-h and no GPU.
-Every unit was scored on its own 20 selection episodes, and the best one was then judged on the
-same held-out seeds as everything else (`reports/hpc/array_results.md`):
-
-| | selection seeds (n=20) | held out (n=80) |
-|---|---|---|
-| best unit `k_short_d0.3_s3` | 55.5 % | **49.4 %** |
-| scripted hunter | 54.3 % | 52.0 % |
-| static camera | 37.6 % | 44.0 % |
-
-**The sweep did not beat the hand-written policy.** Ten of the 45 units "beat" the scripted hunter
-on their own selection seeds by half a point; none of that survived. The best unit gave up 6.1
-points moving to held-out seeds and finished below both the scripted hunter and the single local
-policy — which is what picking the maximum of 45 noisy 20-episode scores does.
-
-Across the full degradation envelope the picture is the same: the scripted hunter sits at or above
-the sweep's best policy at nearly every point on every axis
-(`reports/curves/hpc_best_summary.png`, verdict data in `reports/evals/step9_*.json`).
-
-The ablation is flat: all nine reward-variant × density cells land between 50.3 % and 52.5 %
-(±1.4–3.7). Neither the action penalty, nor the lost-lock horizon, nor arena clutter moves
-retention. When a swept axis does not move the number, the axis is not the binding constraint —
-so more sweeping was not the answer, and the sweep is reported as the null it is.
-
-## An evader trained to break the lock (PERUN, three H200 runs)
-
-A second PPO agent was trained as the **prey** — privileged observations, rewarded for being
-unseen — against the frozen scripted hunter, 20M steps per run. Three evaders were trained: one
-paid for geometric invisibility, and, after that proxy was found to be decoupled from the metric
-(deviation row 20), two paid for **breaking the tracker's lock**. Every camera policy was scored
-against each on the same held-out seeds (n = 80 per cell, seeds 1000–1079, mid difficulty):
-
-| evader | static camera | scripted hunter | PPO hunter |
+| camera policy | lock retention | 95 % CI | vs fixed camera |
 |---|---|---|---|
-| scripted prey (baseline) | 44.0 | 52.0 | 51.3 |
-| attempt 1 — visibility reward | 27.6 | 50.8 | 35.9 |
-| seed 1 — lock reward | 18.6 | **34.7** | 26.6 |
-| seed 2 — lock reward | 28.9 | 49.7 | 31.1 |
+| fixed camera | 44.0 % | [36.9, 51.0] | — |
+| **hand-written ("scripted") hunter** | **52.0 %** | [44.6, 59.4] | **+8.0** [+2.3, +13.7] |
+| PPO hunter (reinforcement learning) | 51.3 % | [43.6, 59.0] | +7.3 [+1.1, +13.5] |
 
-**Every policy is degraded, the scripted one least.** Pooled over the two lock-reward evaders
-(n = 160): static −20.2 points [−26.4, −14.0], scripted −9.8 [−17.2, −2.4], PPO −22.5
-[−29.0, −16.0]. All three intervals exclude zero, so the scripted hunter is *not* immune — an
-evader optimising the right objective costs it about 10 points.
+- **Moving helps:** both moving cameras beat the fixed one; both intervals exclude zero.
+- **Learning did not beat the script:** scripted − PPO = +0.7 points, CI [−5.1, +6.5]. A 45-run cluster sweep
+  of PPO settings did not change that (best run: 49.4 % held out).
+- **A trained evader hurts everyone, the script least:** an evader rewarded for breaking the lock costs the
+  scripted hunter ~10 points and the fixed and PPO cameras ~20 each (details below).
 
-**What replicates is the ordering.** The scripted hunter gives up 12.7 points less than the PPO
-hunter, CI [+6.5, +18.9], and 10.5 less than the static camera, CI [+4.7, +16.3], pooled over the
-two corrected seeds; the same sign appears in all three independently trained evaders
-(+14.2, +7.4, +18.0 against the PPO hunter). A chasing controller re-centres a target that runs;
-a fixed camera cannot, and the learned hunter does so poorly.
+<p align="center"><img src="reports/curves/summary.png" width="760" alt="Five panels of lock retention versus one difficulty dial for the PPO, scripted and static (fixed) cameras. Retention falls from about 90 % to about 30 % as the person gets faster or more evasive; occluder density matters only at its maximum; channel dropout is flat; darkness is lowest at its two lightest settings. Error bars are large and overlap."></p>
+<p align="center"><sub>Retention vs one difficulty dial at a time (others at 0.5); mean ± 1 std over 20 episodes per point,
+so the bars overlap heavily. In the legend "static" = fixed camera and "prey" = the person. <b>A faster or more evasive
+person hurts most</b> (~90 % → ~30 %); more pillars matters only at the maximum; one dead sensor barely matters.
+Darkness is not monotone: in good light the scripted person hides behind pillars, in the dark it seeks darkness
+instead, which the thermal channel sees through — a property of the scripted person, not of the camera.
+Per-axis worst cases: <a href="reports/sweep/failure_report.md">failure report</a>.</sub></p>
 
-**Seed variance is large and is not hidden:** the same objective and 20M steps produced an evader
-that costs the scripted hunter 17.3 points (seed 1) and one that costs it 2.3 (seed 2). Two seeds
-bound that spread loosely; a third would bound it better. Attempt 1's evader plateaued after 2M of
-its 20M steps and never beat the hand-written prey against its own training opponent — which is
-what motivated the reward correction, and why its row is kept above rather than deleted.
-
-Caveat carried from the review: the scripted prey these are compared against wanders at half speed
-when not actively evading and realises 69 % of the speed cap, while a learned prey may use all of
-it. Part of every degradation above is that handicap. Data: `reports/evals/`, table generator
-`scripts/prey_table.py`.
-
-## How it works (7 packages, each standalone)
+## How it works
 
 ```
-core     typed schemas + the retention metric (numpy only)
-env      MuJoCo arena: pillars, point lights, a kinematic drone camera (velocity commands,
-         fixed altitude, first-order response), a capsule humanoid; line of sight via mj_ray;
-         the true 2D box is projected from state — no render in the loop
-sensor   colour / depth / thermal-proxy render passes, channel registry, dead-channel flags
-track    noisy-GT boxes (miss, jitter, range dropout, 1-step latency) → ByteTrack → lock status
-policy   scripted prey (cover-seek, dark-seek, LOS-break, speed dials) · scripted hunter ·
-         PPO hunter (Stable-Baselines3, state observations only, CPU)
-harness  episode runner, Gymnasium wrapper, train / eval / sweep / render CLIs
-demo     three shots + Gradio viewer (static HTML fallback)
+env      MuJoCo arena: pillars, lights, a drone camera driven by velocity commands, a walking person
+sensor   three channels — colour, depth, "thermal" (a second render pass with a glowing person,
+         unaffected by light); any channel can be switched off
+track    no learned detector: each channel reports the person's TRUE box only when it could see them
+         (line of sight, enough light for colour, channel alive); noise then drops, jitters and
+         delays the boxes; channels are fused and fed to ByteTrack
+policy   the evader (scripted: seeks cover, darkness, breaks line of sight) and the camera
+         (fixed · scripted "keep the person visible" · PPO trained on state, not pixels, on CPU)
+harness  episode runner, Gymnasium wrapper, train / eval / sweep / render commands
 ```
 
-Design law: **nothing outside our control in the critical path.** The tracker consumes the
-simulator's own true boxes plus injected noise, so it can never fail for a reason we cannot fix.
-RL trains on state (own pose, last-seen target pose, time since seen, 16 raycasts, light level
-at the last sighting, channel-alive flags; 4-frame stack), never on pixels; rendering exists for
-clips only. The reward is the frozen tracker's lock, run inside the training loop at state speed.
-"Thermal" is a **thermal proxy**: a second render pass with an emissive target material,
-unaffected by light level.
+Using the simulator's own boxes means the tracker can only fail for reasons the experiment controls.
+Rendering is used for the clips only; training and evaluation run on state.
 
-## Where it breaks (honest list — every line traces to `reports/deviation-log.md` or a JSON)
+## Quickstart
 
-- **Coasting through occlusion is a lottery.** ByteTrack's image-space Kalman keeps the id across
-  a 2 s gap in 16 of 20 noise seeds at noise dial 0.3, flat in box speed and state model
-  (row 6). The hunter's job is to keep gaps short.
-- **Moving cameras pay a latency tax.** The noise model delivers boxes one step late at dial
-  0.3; retention scores against the current box, so the faster the box moves in the image, the
-  lower the IoU. The static floor is exempt by construction.
-- **Darkness alone never breaks lock**: the thermal proxy is dark-immune, so the darkness curve
-  is flat-to-rising. It rises because the scripted prey blends dark-seeking with cover-seeking
-  above darkness 0.3 and hides behind pillars less — a property of the examiner, stated here.
-- **The prey examines movers harder than the floor.** Disabling its line-of-sight break widens the
-  scripted-vs-static gap from +10.2 to +16.8 points (`reports/los_break_bias.json`): the shipped
-  comparison is conservative for the hunters by ≈ 6.5 points.
-- **Reward ≠ visibility.** A policy rewarded for raw visibility learned to strafe and yaw so hard
-  that boxes jumped ~8 px/step and the tracker switched ids 5.6× per episode — visibility up,
-  retention down (row 8). Exploration noise above std ≈ 0.2 pushes the target out of the field
-  of view (row 9). Letting the policy observe the tracker's lock instead of geometry (row 12)
-  made it worse on held-out seeds (row 13). Three local PPO designs; one passes the floor, none
-  beats the scripted hunter.
-- **The learned policy never beat the script — across five local runs and a 45-unit cluster
-  sweep.** The fork this project pre-registered ("PPO never beats the scripted hunter after three
-  attempts") fired at 3 of 3, and its written default stands: the scripted hunter is the hero and
-  the PPO result is reported as it is. It also degrades faster under pressure. Under the
-  learned evader the PPO hunter gives up 12.7 points more than the scripted one (paired CI
-  [+6.5, +18.9], pooled over two independently trained evaders) — but the scripted hunter is not
-  immune either, losing ~10 points itself. Five local training runs (three of them
-  instrument-defective and diagnosed as such) and a 45-unit HPC sweep over seeds, reward
-  variants and arena densities; the best PPO hunter ties the hand-written one. What PPO does
-  buy is a faster reacquisition (1.70 vs 2.09 steps) at the same retention.
+Needs Python 3.11 and [uv](https://docs.astral.sh/uv/). Runs on a laptop CPU (developed on Windows 11; on
+Linux set `MUJOCO_GL=egl` or `osmesa` for rendering). Note: `uv sync` pulls the CUDA 12.6 build of PyTorch
+(~2.5 GB) from the lock file, although nothing here needs a GPU.
 
-## Compute
+```bash
+git clone https://github.com/matus012/lockon && cd lockon
+uv sync                                   # creates .venv from uv.lock
+uv run pytest -q                          # unit + licence-guard tests
 
-Everything demo-facing runs on a laptop; the cluster work is a sweep, not a requirement.
+# The headline table: runs the published PPO policy, the scripted hunter and the fixed camera on the same
+# 80 held-out seeds, then prints the table above
+uv run python -m lockon.harness.eval --policy models/ppo_hunter.zip --vs scripted --n 80 --seed-base 1000 --json reports/my_eval.json
+uv run python scripts/readme_table.py --json reports/my_eval.json
+```
+
+<details>
+<summary>Everything else: clips, degradation curves, training, cluster runs</summary>
+
+```bash
+uv run python -m lockon.demo.render_all --policy scripted   # the three short demo shots -> demo/shots/
+uv run python -m lockon.demo.showcase                        # the 12 showcase clips + reel (~25 min)
+uv run python -m lockon.harness.sweep --config configs/sweep_local.yaml --workers 6   # curves; ≤ 6 workers on 16 GB
+uv run python -m lockon.harness.train --config configs/ppo_local.yaml --out runs/ppo_local   # 6M steps ≈ 35 min CPU
+uv run python scripts/check_gates.py --all                   # every project check -> reports/gates.json
+```
+
+The cluster side (45-run sweep, evader training) is documented in [`HPC_RUNBOOK.md`](HPC_RUNBOOK.md); the job
+scripts are generated from [`configs/hpc_sweep.yaml`](configs/hpc_sweep.yaml).
+</details>
+
+## Clips
+
+Static previews; click one to download its mp4 from the [v1.0 Release](https://github.com/matus012/lockon/releases/tag/v1.0).
+Each is a single episode with its own running retention burned in — the result is the table above, not these.
+
+| | |
+|---|---|
+| [![A frame from the 70-second captioned reel: the person with a green lock box between pillars](reports/thumbs/sizzle.png)](https://github.com/matus012/lockon/releases/download/v1.0/sizzle.mp4)<br>**The reel** — 70 s captioned cut of everything below | [![Three panels side by side: fixed, scripted and PPO camera on the same seed](reports/thumbs/split_dense.png)](https://github.com/matus012/lockon/releases/download/v1.0/split_dense.mp4)<br>**Fixed · scripted · PPO**, same seed and start; the worlds diverge because the person reacts to each camera |
+| [![Untrained PPO camera beside the trained one](reports/thumbs/pair_hunter.png)](https://github.com/matus012/lockon/releases/download/v1.0/pair_hunter.mp4)<br>**Untrained vs trained PPO camera** — in this one episode both end level; over 80 episodes training is worth +6.9 points [+0.9, +13.0] ([data](reports/evals/showcase_pairs.json)) | [![Random-walk evader beside the evader trained to break the lock](reports/thumbs/pair_evader.png)](https://github.com/matus012/lockon/releases/download/v1.0/pair_evader.mp4)<br>**Random walker vs the published trained evader** (the first, invisibility-reward one): it costs the scripted hunter only 2.1 points [−6.7, +10.8] over 80 episodes — not distinguishable from noise ([data](reports/evals/showcase_pairs.json)) |
+| [![Dark arena: the colour channel is black, only the glowing thermal silhouette is visible](reports/thumbs/scenario_dark.png)](https://github.com/matus012/lockon/releases/download/v1.0/scenario_dark.mp4)<br>**Lights out** — colour is blind, thermal keeps the box; this episode still ends with a lock loss | [![Colour, depth and thermal panels side by side through a lights-cut](reports/thumbs/sensor_reel.png)](https://github.com/matus012/lockon/releases/download/v1.0/sensor_reel.mp4)<br>**Colour · depth · thermal** through a lights-cut and a channel dropout |
+
+## More results
+
+<details>
+<summary><b>The 45-run cluster sweep did not beat the hand-written policy</b></summary>
+
+Five seeds × three reward variants × three arena densities, 6M PPO steps each, ~74 CPU-hours on the TUKE PERUN
+cluster (no GPU). Each run was scored on its own 20 selection episodes; the best was then scored on the same
+80 held-out episodes as everything else ([`reports/hpc/array_results.md`](reports/hpc/array_results.md)).
+
+| | selection episodes (n = 20) | held out (n = 80) |
+|---|---|---|
+| best sweep run | 55.5 % | **49.4 %** |
+| scripted hunter | 54.3 % | 52.0 % |
+| fixed camera | 37.6 % | 44.0 % |
+
+Ten of 45 runs "beat" the script on their own selection episodes by about half a point; none survived held-out
+scoring — the expected result of picking the maximum of 45 noisy scores. All nine reward × density cells land
+between 50.3 % and 52.5 %: none of the swept settings is what limits retention.
+</details>
+
+<details>
+<summary><b>An evader trained to break the lock</b></summary>
+
+A second PPO agent was trained as the person (20M steps per run, one H200 GPU each), rewarded for being unseen,
+against the frozen scripted camera. Only the first one is published (`models/learned_prey_seed0.zip`); the two
+lock-reward evaders were trained on the cluster and only their evaluation results are in the repo. The first attempt was rewarded for geometric invisibility; that turned out
+not to track the lock metric, so two more were rewarded for breaking the tracker's lock directly. Lock retention,
+80 held-out episodes per cell ([`reports/evals/`](reports/evals/), table by [`scripts/prey_table.py`](scripts/prey_table.py)):
+
+| evader | fixed camera | scripted hunter | PPO hunter |
+|---|---|---|---|
+| scripted evader (baseline) | 44.0 | 52.0 | 51.3 |
+| attempt 1 — invisibility reward | 27.6 | 50.8 | 35.9 |
+| lock reward, seed 1 | 18.6 | 34.7 | 26.6 |
+| lock reward, seed 2 | 28.9 | 49.7 | 31.1 |
+
+Pooled over the two lock-reward evaders (n = 160): fixed −20.2 points [−26.4, −14.0], scripted −9.8
+[−17.2, −2.4], PPO −22.5 [−29.0, −16.0]. The scripted camera is not immune, but it loses 12.7 points less than
+PPO [+6.5, +18.9], and the same ordering appears against all three evaders. The two lock-reward seeds differ a
+lot (−17.3 vs −2.3 for the scripted camera); two seeds bound that spread only loosely. The scripted evader also
+moves slower on average (69 % of the speed cap) than a learned one may, which accounts for part of each drop.
+</details>
+
+<details>
+<summary><b>Compute</b></summary>
 
 | where | what | cost |
 |---|---|---|
-| RTX 4060 laptop, CPU | all seven packages, five local PPO runs, the degradation sweep (1 500 episodes), every clip | state-only PPO at ~2.9k env steps/s; a 6M-step run is ~35 min |
-| TUKE PERUN, cpu_short | 45-unit sweep: 5 seeds × 3 reward variants × 3 arena densities, 6M steps each | ~74 CPU-h, 0 GPU-h |
-| TUKE PERUN, gpu_short (H200) | three learned-prey trials (20M steps each) + the step-9 verdict, curves and clips | **7.5 GPU-h total**, ~8k env steps/s |
+| laptop (RTX 4060, CPU used) | all code, five local PPO runs, 1,500-episode degradation sweep, every clip | ~2.9k env steps/s; 6M steps ≈ 35 min |
+| TUKE PERUN, CPU nodes | 45-run PPO sweep | ~74 CPU-h (job wall-hours, 8 cores each) |
+| TUKE PERUN, H200 GPU | three evader runs + final evaluation, curves and clips | 7.5 GPU-h total |
 
-GPU-h by job (5 H200 jobs, from the PERUN job logs): probe 0.03 · three learned-prey runs
-2.2 / 2.3 / 2.15 · step-9 verdict + curves + clips 0.85 = 7.53. An earlier 9.4 figure was a
-pre-measurement estimate and is superseded. The CPU figure is job wall-hours (8 cores each).
+PPO here is a small MLP over a 26-number state, so it is fastest on CPU; the GPU pays off for evader-training
+throughput and offscreen rendering.
+</details>
 
-State-only PPO is CPU-optimal (a two-layer MLP over a 26-dim observation), so the array asks for
-no GPU at all. The GPU earns its place on the prey trial's throughput and on EGL offscreen
-rendering. Reproduce the cluster side with `HPC_RUNBOOK.md`; the job scripts are emitted from
-`configs/hpc_sweep.yaml` and carry their own budget table.
+## Limitations
 
-## Run it
+- **Simulation only.** Nothing here was tested on real hardware or real video, and the tracker gets simulated
+  boxes, not a learned detector's output.
+- **The thermal channel is a stand-in** — a render pass where the person glows — not a model of a real thermal camera.
+- **Coasting through occlusion is luck-dependent.** ByteTrack keeps the id across a 2 s gap in 16 of 20 noise
+  seeds; the camera's job is to keep gaps short.
+- **Moving cameras pay a latency tax.** Boxes arrive one step late, so a fast-moving image costs overlap; the
+  fixed camera is exempt by construction.
+- **The scripted evader is harder on moving cameras.** With its line-of-sight-breaking behaviour switched off,
+  the scripted-vs-fixed gap widens by ≈ 6.5 points ([`reports/los_break_bias.json`](reports/los_break_bias.json)),
+  so the headline is conservative for the moving cameras.
+- **Every change to a threshold or rule** during the project is logged in
+  [`reports/deviation-log.md`](reports/deviation-log.md). Some code comments cite "the plan §N" or "the project
+  spec §N" — internal documents that are not published (the per-package `SPEC.md` files are). `reports/` also keeps
+  superseded runs and pilots; the files linked from this README are the canonical ones.
 
-```bash
-uv sync                                                # Python 3.11, per-project venv
-uv run python scripts/check_gates.py --all             # every gate, verdicts -> reports/gates.json
-uv run python -m lockon.harness.eval --policy scripted --vs static --n 20 --seed-base 1000
-uv run python -m lockon.harness.sweep --config configs/sweep_local.yaml --workers 6
-uv run python -m lockon.harness.train --config configs/ppo_local.yaml --out runs/ppo_local
-uv run python -m lockon.demo.render_all --policy scripted && uv run python -m lockon.demo.viewer
-uv run python -m lockon.demo.showcase                    # demos/showcase: 12 clips + the cut
-uv run python scripts/showcase_pair_stats.py            # the two before/after pairs, n=80
+## Repo layout
+
+```
+src/lockon/   core · env · sensor · track · policy · harness · demo   (each package standalone)
+configs/      PPO, sweep and cluster configs
+models/       the two published policies (PPO camera, learned evader) — see models/README.md
+reports/      evaluation JSONs, curves, sweep and cluster results, deviation log
+scripts/      table generators, checks, plotting
+tests/        unit tests + licence guard
+demos/        how the showcase clips are built and read (the mp4s are in the Release)
+demo/         the short demo shots and a static viewer page
 ```
 
-Windows 11 + GLFW offscreen rendering is the dev target; Linux uses EGL or OSMesa
-(`MUJOCO_GL`). State-only PPO trains on CPU by design (~2.9k env steps/s on a laptop; 6M steps
-≈ 35 min). The sweep is memory-bound: keep `--workers` ≤ 6 on 16 GB.
+## Licence and credits
 
-## Known gaps
+Apache-2.0 ([LICENSE](LICENSE)). Dependencies are Apache/MIT/BSD only — full list in
+[THIRD_PARTY.md](THIRD_PARTY.md); no datasets and no third-party weights. Built on
+[MuJoCo](https://github.com/google-deepmind/mujoco), [Stable-Baselines3](https://github.com/DLR-RM/stable-baselines3)
+(PPO), [Gymnasium](https://github.com/Farama-Foundation/Gymnasium), and ByteTrack via Roboflow
+[`trackers`](https://github.com/roboflow/trackers) (Zhang et al., *ByteTrack*, ECCV 2022). Cluster time:
+TUKE PERUN.
 
-Shipped as-is (v1.0, 2026-09-26); these are recorded, not planned:
-
-- **No watts in the edge table.** Compute is reported as throughput and GPU-/CPU-hours only; power
-  draw was never measured.
-- **No `docs/concept.md`.** The concept lives in this README and the unpublished development plan; no
-  standalone concept document was written.
-- **Development plan and spec are not published.** Comments cite `the plan §N` and `the project spec §N`;
-  those internal documents are not in this repository. `reports/deviation-log.md` records every change
-  to a gate, threshold or plan clause.
-
-## Licences
-
-Apache-2.0. Dependencies are Apache/MIT/BSD only (`THIRD_PARTY.md`); no datasets, no weights.
-A guard test (`tests/test_license_guard.py`) classifies every committed visual and rejects
-untracked source files and anchored-ignore mistakes.
+```bibtex
+@software{filo_lockon_2026,
+  author = {Filo, Matus},
+  title  = {lockon: active perception under degradation},
+  year   = {2026},
+  url    = {https://github.com/matus012/lockon}
+}
+```

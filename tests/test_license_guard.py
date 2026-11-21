@@ -56,6 +56,14 @@ ALLOWED_TRACKED_VISUALS: dict[str, str] = {
     "reports/gifs/showcase_pair_evader.gif": "sim-render",
     "reports/gifs/showcase_evader_reel.gif": "sim-render",
     "reports/gifs/showcase_sensor_reel.gif": "sim-render",
+    # README hero (a 15 s re-encode of demos/showcase/scenario_dense.mp4) and static clip previews
+    "reports/gifs/hero_dense.gif": "sim-render",
+    "reports/thumbs/sizzle.png": "sim-render",
+    "reports/thumbs/split_dense.png": "sim-render",
+    "reports/thumbs/pair_hunter.png": "sim-render",
+    "reports/thumbs/pair_evader.png": "sim-render",
+    "reports/thumbs/scenario_dark.png": "sim-render",
+    "reports/thumbs/sensor_reel.png": "sim-render",
 }
 
 GIF_CEILING = 10 * 1024 * 1024  # the owner's line: no committed mp4/GIF over 10 MB
